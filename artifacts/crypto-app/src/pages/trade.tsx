@@ -109,7 +109,7 @@ export default function TradePage() {
     });
   };
 
-  const symbolActiveTrades = activeTrades?.trades.filter(t => t.symbol === symbol) || [];
+  const symbolActiveTrades = (Array.isArray(activeTrades) ? activeTrades : []).filter(t => t.symbol === symbol);
 
   return (
     <div className="flex flex-col h-full bg-background relative">
