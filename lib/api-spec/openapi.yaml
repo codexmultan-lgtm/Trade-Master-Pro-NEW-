@@ -3,20 +3,34 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: CryptoTrade Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: users
+    description: User operations
+  - name: wallet
+    description: Wallet & balance operations
+  - name: trades
+    description: Trading operations
+  - name: markets
+    description: Market data operations
+  - name: admin
+    description: Admin panel operations
+  - name: notifications
+    description: Notification operations
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +38,657 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── AUTH ───
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout user
+      responses:
+        "200":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+
+  /auth/me/password:
+    patch:
+      operationId: changePassword
+      tags: [auth]
+      summary: Change password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordInput"
+      responses:
+        "200":
+          description: Password changed
+
+  # ─── WALLET ───
+  /wallet:
+    get:
+      operationId: getWallet
+      tags: [wallet]
+      summary: Get wallet balance and summary
+      responses:
+        "200":
+          description: Wallet data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WalletSummary"
+
+  /wallet/deposit:
+    post:
+      operationId: requestDeposit
+      tags: [wallet]
+      summary: Submit a deposit request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepositInput"
+      responses:
+        "201":
+          description: Deposit request submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /wallet/withdraw:
+    post:
+      operationId: requestWithdrawal
+      tags: [wallet]
+      summary: Submit a withdrawal request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawalInput"
+      responses:
+        "201":
+          description: Withdrawal request submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /wallet/transactions:
+    get:
+      operationId: getTransactions
+      tags: [wallet]
+      summary: Get user transaction history
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [deposit, withdrawal, trade_win, trade_loss, adjustment]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Transaction list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionList"
+
+  # ─── TRADES ───
+  /trades:
+    post:
+      operationId: placeTrade
+      tags: [trades]
+      summary: Place a binary trade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TradeInput"
+      responses:
+        "201":
+          description: Trade placed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+        "400":
+          description: Insufficient balance or validation error
+
+  /trades/active:
+    get:
+      operationId: getActiveTrades
+      tags: [trades]
+      summary: Get all active (open) trades for the current user
+      responses:
+        "200":
+          description: Active trades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Trade"
+
+  /trades/history:
+    get:
+      operationId: getTradeHistory
+      tags: [trades]
+      summary: Get completed trade history
+      parameters:
+        - name: symbol
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Trade history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeList"
+
+  /trades/stats:
+    get:
+      operationId: getTradeStats
+      tags: [trades]
+      summary: Get user trading statistics summary
+      responses:
+        "200":
+          description: Trade stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeStats"
+
+  /trades/{id}:
+    get:
+      operationId: getTrade
+      tags: [trades]
+      summary: Get single trade by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Trade detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+
+  # ─── MARKETS ───
+  /markets:
+    get:
+      operationId: getMarkets
+      tags: [markets]
+      summary: Get list of available trading pairs
+      responses:
+        "200":
+          description: Market list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Market"
+
+  /markets/{symbol}/candles:
+    get:
+      operationId: getCandles
+      tags: [markets]
+      summary: Get candlestick data for a symbol
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: interval
+          in: query
+          schema:
+            type: string
+            enum: [1m, 5m, 15m, 1h]
+            default: 1m
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+      responses:
+        "200":
+          description: Candle data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Candle"
+
+  /markets/{symbol}/price:
+    get:
+      operationId: getCurrentPrice
+      tags: [markets]
+      summary: Get current price for a symbol
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current price
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PriceTick"
+
+  # ─── NOTIFICATIONS ───
+  /notifications:
+    get:
+      operationId: getNotifications
+      tags: [notifications]
+      summary: Get user notifications
+      parameters:
+        - name: unread
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    patch:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark a notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Marked as read
+
+  /notifications/read-all:
+    patch:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark all notifications as read
+      responses:
+        "200":
+          description: All marked as read
+
+  /notifications/unread-count:
+    get:
+      operationId: getUnreadNotificationCount
+      tags: [notifications]
+      summary: Get count of unread notifications
+      responses:
+        "200":
+          description: Unread count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnreadCount"
+
+  # ─── ADMIN ───
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Get platform-wide analytics
+      responses:
+        "200":
+          description: Admin analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/users:
+    get:
+      operationId: getAdminUsers
+      tags: [admin]
+      summary: Get all users (admin)
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, frozen, banned]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUserList"
+
+  /admin/users/{id}:
+    get:
+      operationId: getAdminUser
+      tags: [admin]
+      summary: Get single user detail (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUserDetail"
+
+    patch:
+      operationId: updateAdminUser
+      tags: [admin]
+      summary: Update user (admin) — status, role, balance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserUpdate"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /admin/users/{id}/balance:
+    patch:
+      operationId: adjustUserBalance
+      tags: [admin]
+      summary: Manually adjust a user's virtual balance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BalanceAdjustment"
+      responses:
+        "200":
+          description: Balance adjusted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /admin/transactions:
+    get:
+      operationId: getAdminTransactions
+      tags: [admin]
+      summary: Get all transactions (admin)
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [deposit, withdrawal, trade_win, trade_loss, adjustment]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+        - name: userId
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: All transactions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionList"
+
+  /admin/transactions/{id}/approve:
+    patch:
+      operationId: approveTransaction
+      tags: [admin]
+      summary: Approve a pending deposit or withdrawal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transaction approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /admin/transactions/{id}/reject:
+    patch:
+      operationId: rejectTransaction
+      tags: [admin]
+      summary: Reject a pending deposit or withdrawal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectionInput"
+      responses:
+        "200":
+          description: Transaction rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+
+  /admin/trades:
+    get:
+      operationId: getAdminTrades
+      tags: [admin]
+      summary: Get all trades (admin)
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, win, loss, cancelled]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: All trades
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeList"
+
+  /admin/trades/{id}/result:
+    patch:
+      operationId: setTradeResult
+      tags: [admin]
+      summary: Manually override trade result (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TradeResultInput"
+      responses:
+        "200":
+          description: Trade result updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trade"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +699,475 @@ components:
       required:
         - status
 
+    # ─── AUTH ───
+    RegisterInput:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          minLength: 2
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        phone:
+          type: string
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    ChangePasswordInput:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 6
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      required: [id, name, email, role, status, balance, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [user, admin]
+        status:
+          type: string
+          enum: [active, frozen, banned]
+        balance:
+          type: number
+        totalDeposited:
+          type: number
+        totalWithdrawn:
+          type: number
+        totalProfit:
+          type: number
+        totalLoss:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        lastLoginAt:
+          type: ["string", "null"]
+          format: date-time
+
+    # ─── WALLET ───
+    WalletSummary:
+      type: object
+      required: [balance, totalDeposited, totalWithdrawn, totalProfit, totalLoss, netPnl, pendingDeposits, pendingWithdrawals]
+      properties:
+        balance:
+          type: number
+        totalDeposited:
+          type: number
+        totalWithdrawn:
+          type: number
+        totalProfit:
+          type: number
+        totalLoss:
+          type: number
+        netPnl:
+          type: number
+        pendingDeposits:
+          type: number
+        pendingWithdrawals:
+          type: number
+        recentTransactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+
+    DepositInput:
+      type: object
+      required: [amount, method]
+      properties:
+        amount:
+          type: number
+          minimum: 1
+        method:
+          type: string
+          enum: [bank_transfer, crypto, upi]
+        proofUrl:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    WithdrawalInput:
+      type: object
+      required: [amount, method, accountDetails]
+      properties:
+        amount:
+          type: number
+          minimum: 1
+        method:
+          type: string
+          enum: [bank_transfer, crypto, upi]
+        accountDetails:
+          type: string
+
+    Transaction:
+      type: object
+      required: [id, userId, type, amount, status, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        userEmail:
+          type: ["string", "null"]
+        userName:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [deposit, withdrawal, trade_win, trade_loss, adjustment]
+        amount:
+          type: number
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        method:
+          type: ["string", "null"]
+        proofUrl:
+          type: ["string", "null"]
+        accountDetails:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        rejectionReason:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TransactionList:
+      type: object
+      required: [transactions, total, page, limit]
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    # ─── TRADES ───
+    TradeInput:
+      type: object
+      required: [symbol, direction, amount, duration]
+      properties:
+        symbol:
+          type: string
+          enum: [BTCUSDT, BTCINR, ETHUSDT, ETHINR, BNBUSDT]
+        direction:
+          type: string
+          enum: [up, down]
+        amount:
+          type: number
+          minimum: 1
+        duration:
+          type: integer
+          enum: [60, 120, 180, 240]
+          description: Trade duration in seconds
+
+    Trade:
+      type: object
+      required: [id, userId, symbol, direction, amount, duration, profitPercent, status, entryPrice, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        userEmail:
+          type: ["string", "null"]
+        userName:
+          type: ["string", "null"]
+        symbol:
+          type: string
+        direction:
+          type: string
+          enum: [up, down]
+        amount:
+          type: number
+        duration:
+          type: integer
+        profitPercent:
+          type: number
+        entryPrice:
+          type: number
+        exitPrice:
+          type: ["number", "null"]
+        profitLoss:
+          type: ["number", "null"]
+        status:
+          type: string
+          enum: [active, win, loss, cancelled]
+        expiresAt:
+          type: string
+          format: date-time
+        settledAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    TradeList:
+      type: object
+      required: [trades, total, page, limit]
+      properties:
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trade"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    TradeStats:
+      type: object
+      required: [totalTrades, totalWins, totalLosses, winRate, totalProfit, totalLoss, netPnl, totalVolume]
+      properties:
+        totalTrades:
+          type: integer
+        totalWins:
+          type: integer
+        totalLosses:
+          type: integer
+        winRate:
+          type: number
+        totalProfit:
+          type: number
+        totalLoss:
+          type: number
+        netPnl:
+          type: number
+        totalVolume:
+          type: number
+        bestTrade:
+          type: ["number", "null"]
+        worstTrade:
+          type: ["number", "null"]
+
+    TradeResultInput:
+      type: object
+      required: [result]
+      properties:
+        result:
+          type: string
+          enum: [win, loss]
+
+    # ─── MARKETS ───
+    Market:
+      type: object
+      required: [symbol, baseAsset, quoteAsset, lastPrice, change24h, high24h, low24h, volume24h]
+      properties:
+        symbol:
+          type: string
+        baseAsset:
+          type: string
+        quoteAsset:
+          type: string
+        lastPrice:
+          type: number
+        change24h:
+          type: number
+        high24h:
+          type: number
+        low24h:
+          type: number
+        volume24h:
+          type: number
+
+    Candle:
+      type: object
+      required: [time, open, high, low, close, volume]
+      properties:
+        time:
+          type: integer
+          description: Unix timestamp in seconds
+        open:
+          type: number
+        high:
+          type: number
+        low:
+          type: number
+        close:
+          type: number
+        volume:
+          type: number
+
+    PriceTick:
+      type: object
+      required: [symbol, price, timestamp]
+      properties:
+        symbol:
+          type: string
+        price:
+          type: number
+        change24h:
+          type: number
+        timestamp:
+          type: integer
+
+    # ─── NOTIFICATIONS ───
+    Notification:
+      type: object
+      required: [id, userId, type, title, message, read, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        type:
+          type: string
+          enum: [trade_result, deposit_status, withdrawal_status, balance_adjustment, system, admin_message]
+        title:
+          type: string
+        message:
+          type: string
+        read:
+          type: boolean
+        data:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+
+    UnreadCount:
+      type: object
+      required: [count]
+      properties:
+        count:
+          type: integer
+
+    # ─── ADMIN ───
+    AdminStats:
+      type: object
+      required: [totalUsers, activeUsers, frozenUsers, totalDeposited, totalWithdrawn, totalTrades, pendingDeposits, pendingWithdrawals, platformPnl, todayTrades, todaySignups, todayVolume]
+      properties:
+        totalUsers:
+          type: integer
+        activeUsers:
+          type: integer
+        frozenUsers:
+          type: integer
+        totalDeposited:
+          type: number
+        totalWithdrawn:
+          type: number
+        totalTrades:
+          type: integer
+        pendingDeposits:
+          type: integer
+        pendingWithdrawals:
+          type: integer
+        platformPnl:
+          type: number
+        todayTrades:
+          type: integer
+        todaySignups:
+          type: integer
+        todayVolume:
+          type: number
+
+    AdminUserList:
+      type: object
+      required: [users, total, page, limit]
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    AdminUserDetail:
+      type: object
+      required: [user, recentTrades, recentTransactions]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        recentTrades:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trade"
+        recentTransactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+
+    AdminUserUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [active, frozen, banned]
+        role:
+          type: string
+          enum: [user, admin]
+        name:
+          type: string
+        phone:
+          type: string
+
+    BalanceAdjustment:
+      type: object
+      required: [amount, type, reason]
+      properties:
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [credit, debit]
+        reason:
+          type: string
+
+    RejectionInput:
+      type: object
+      properties:
+        reason:
+          type: string
