@@ -322,7 +322,7 @@ paths:
 
   /markets/{symbol}/candles:
     get:
-      operationId: getCandles
+      operationId: listCandles
       tags: [markets]
       summary: Get candlestick data for a symbol
       parameters:

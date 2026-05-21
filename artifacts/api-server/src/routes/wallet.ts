@@ -1,0 +1,110 @@
+import { Router } from "express";
+import type { Response } from "express";
+import { authMiddleware, checkFrozen, AuthRequest } from "../middlewares/auth.js";
+import { User } from "../models/User.js";
+import { Transaction } from "../models/Transaction.js";
+import { Notification } from "../models/Notification.js";
+
+const router = Router();
+router.use(authMiddleware);
+
+function formatTx(tx: InstanceType<typeof Transaction>, user?: { email?: string; name?: string }) {
+  return {
+    id: tx._id.toString(),
+    userId: tx.userId.toString(),
+    userEmail: user?.email ?? null,
+    userName: user?.name ?? null,
+    type: tx.type,
+    amount: tx.amount,
+    status: tx.status,
+    method: tx.method ?? null,
+    proofUrl: tx.proofUrl ?? null,
+    accountDetails: tx.accountDetails ?? null,
+    notes: tx.notes ?? null,
+    rejectionReason: tx.rejectionReason ?? null,
+    createdAt: tx.createdAt,
+    updatedAt: tx.updatedAt,
+  };
+}
+
+router.get("/", async (req: AuthRequest, res: Response) => {
+  const user = await User.findById(req.userId);
+  if (!user) { res.status(404).json({ error: "Not found" }); return; }
+
+  const pendingDeposits = await Transaction.countDocuments({ userId: req.userId, type: "deposit", status: "pending" });
+  const pendingWithdrawals = await Transaction.countDocuments({ userId: req.userId, type: "withdrawal", status: "pending" });
+  const recent = await Transaction.find({ userId: req.userId }).sort({ createdAt: -1 }).limit(5);
+
+  res.json({
+    balance: user.balance,
+    totalDeposited: user.totalDeposited,
+    totalWithdrawn: user.totalWithdrawn,
+    totalProfit: user.totalProfit,
+    totalLoss: user.totalLoss,
+    netPnl: user.totalProfit - user.totalLoss,
+    pendingDeposits,
+    pendingWithdrawals,
+    recentTransactions: recent.map((tx) => formatTx(tx)),
+  });
+});
+
+router.post("/deposit", checkFrozen, async (req: AuthRequest, res: Response) => {
+  const { amount, method, proofUrl, notes } = req.body;
+  if (!amount || amount <= 0 || !method) {
+    res.status(400).json({ error: "amount and method required" });
+    return;
+  }
+  const tx = await Transaction.create({
+    userId: req.userId,
+    type: "deposit",
+    amount,
+    status: "pending",
+    method,
+    proofUrl: proofUrl ?? null,
+    notes: notes ?? null,
+  });
+  res.status(201).json(formatTx(tx));
+});
+
+router.post("/withdraw", checkFrozen, async (req: AuthRequest, res: Response) => {
+  const { amount, method, accountDetails } = req.body;
+  if (!amount || amount <= 0 || !method || !accountDetails) {
+    res.status(400).json({ error: "amount, method, accountDetails required" });
+    return;
+  }
+  const user = await User.findById(req.userId);
+  if (!user || user.balance < amount) {
+    res.status(400).json({ error: "Insufficient balance" });
+    return;
+  }
+  const tx = await Transaction.create({
+    userId: req.userId,
+    type: "withdrawal",
+    amount,
+    status: "pending",
+    method,
+    accountDetails,
+  });
+  res.status(201).json(formatTx(tx));
+});
+
+router.get("/transactions", async (req: AuthRequest, res: Response) => {
+  const { type, status, limit = "20", page = "1" } = req.query as Record<string, string>;
+  const query: Record<string, unknown> = { userId: req.userId };
+  if (type) query.type = type;
+  if (status) query.status = status;
+
+  const lim = Math.min(parseInt(limit, 10) || 20, 100);
+  const pg = Math.max(parseInt(page, 10) || 1, 1);
+  const skip = (pg - 1) * lim;
+
+  const [transactions, total] = await Promise.all([
+    Transaction.find(query).sort({ createdAt: -1 }).skip(skip).limit(lim),
+    Transaction.countDocuments(query),
+  ]);
+
+  res.json({ transactions: transactions.map((tx) => formatTx(tx)), total, page: pg, limit: lim });
+});
+
+export { formatTx };
+export default router;
