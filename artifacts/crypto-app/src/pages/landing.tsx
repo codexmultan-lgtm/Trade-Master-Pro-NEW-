@@ -493,14 +493,13 @@ function AboutSection() {
               </span>
             </motion.h2>
             <motion.p variants={fadeUp} className="text-white/50 text-base leading-relaxed mb-6">
-              CryptoTrade is a full-stack MERN binary options platform with real-time WebSocket price feeds,
-              professional candlestick charts, and a complete admin control panel. Built for demo and
-              educational trading with virtual balances.
+              DualTrade is a fully secured binary options platform with real-time price feeds and
+              professional candlestick charts. 
             </motion.p>
             <motion.p variants={fadeUp} className="text-white/50 text-base leading-relaxed mb-8">
-              Every wallet is admin-controlled — deposits and withdrawals go through an approval workflow.
-              Admins can adjust balances, force trade outcomes, freeze accounts, and manage the entire
-              platform from a dedicated dashboard.
+              Every wallet is user-controlled — deposits and withdrawals go through an approval workflow and are fully secure.
+              User can Withdraw balances, force trade outcomes, and manage the entire account.
+            
             </motion.p>
             <motion.div variants={fadeUp}>
               <Link href="/register">
@@ -555,7 +554,7 @@ function CtaSection() {
               Ready to Start Trading?
             </motion.h2>
             <motion.p variants={fadeUp} className="text-lg text-white/50 mb-8 relative max-w-xl mx-auto">
-              Create your free account now. Admin will fund your wallet so you can start trading binary options immediately.
+              Create your free account now. Fund your wallet so you can start trading binary options immediately.
             </motion.p>
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 justify-center relative">
               <Link href="/register">
