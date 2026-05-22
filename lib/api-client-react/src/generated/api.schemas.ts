@@ -480,6 +480,10 @@ export const GetAdminUsersStatus = {
   banned: 'banned',
 } as const;
 
+export type ResetUserWalletBody = {
+  reason: string;
+};
+
 export type GetAdminTransactionsParams = {
 type?: GetAdminTransactionsType;
 status?: GetAdminTransactionsStatus;

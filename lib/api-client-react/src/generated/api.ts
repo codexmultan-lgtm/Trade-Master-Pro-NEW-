@@ -43,6 +43,7 @@ import type {
   PriceTick,
   RegisterInput,
   RejectionInput,
+  ResetUserWalletBody,
   Trade,
   TradeInput,
   TradeList,
@@ -2118,6 +2119,78 @@ export const useAdjustUserBalance = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getAdjustUserBalanceMutationOptions(options));
+    }
+
+export const getResetUserWalletUrl = (id: string,) => {
+
+
+
+
+  return `/api/admin/users/${id}/wallet/reset`
+}
+
+/**
+ * @summary Reset a user's wallet to zero
+ */
+export const resetUserWallet = async (id: string,
+    resetUserWalletBody: ResetUserWalletBody, options?: RequestInit): Promise<User> => {
+
+  return customFetch<User>(getResetUserWalletUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      resetUserWalletBody,)
+  }
+);}
+
+
+
+
+export const getResetUserWalletMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetUserWallet>>, TError,{id: string;data: BodyType<ResetUserWalletBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof resetUserWallet>>, TError,{id: string;data: BodyType<ResetUserWalletBody>}, TContext> => {
+
+const mutationKey = ['resetUserWallet'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetUserWallet>>, {id: string;data: BodyType<ResetUserWalletBody>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  resetUserWallet(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResetUserWalletMutationResult = NonNullable<Awaited<ReturnType<typeof resetUserWallet>>>
+    export type ResetUserWalletMutationBody = BodyType<ResetUserWalletBody>
+    export type ResetUserWalletMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Reset a user's wallet to zero
+ */
+export const useResetUserWallet = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetUserWallet>>, TError,{id: string;data: BodyType<ResetUserWalletBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof resetUserWallet>>,
+        TError,
+        {id: string;data: BodyType<ResetUserWalletBody>},
+        TContext
+      > => {
+      return useMutation(getResetUserWalletMutationOptions(options));
     }
 
 export const getGetAdminTransactionsUrl = (params?: GetAdminTransactionsParams,) => {

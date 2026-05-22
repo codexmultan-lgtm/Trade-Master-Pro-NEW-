@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import NotFound from "@/pages/not-found";
 
+import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard";
@@ -28,59 +29,64 @@ function Router() {
   const { user, isLoading, isAdmin } = useAuth();
 
   if (isLoading) {
-    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#0a0a0f]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 animate-pulse" />
+          <span className="text-white/40 text-sm">Loading...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <AppLayout>
-      <Switch>
-        <Route path="/">
-          {user ? <Redirect to="/dashboard" /> : <Redirect to="/login" />}
-        </Route>
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
-        
-        <Route path="/dashboard">
-          {() => user ? <Dashboard /> : <Redirect to="/login" />}
-        </Route>
-        <Route path="/trade">
-          {() => user ? <TradeList /> : <Redirect to="/login" />}
-        </Route>
-        <Route path="/trade/:symbol">
-          {() => user ? <TradePage /> : <Redirect to="/login" />}
-        </Route>
-        <Route path="/history">
-          {() => user ? <History /> : <Redirect to="/login" />}
-        </Route>
-        <Route path="/wallet">
-          {() => user ? <Wallet /> : <Redirect to="/login" />}
-        </Route>
-        <Route path="/profile">
-          {() => user ? <Profile /> : <Redirect to="/login" />}
-        </Route>
-        <Route path="/notifications">
-          {() => user ? <Notifications /> : <Redirect to="/login" />}
-        </Route>
+    <Switch>
+      <Route path="/">
+        {user ? <Redirect to="/dashboard" /> : <Landing />}
+      </Route>
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
 
-        <Route path="/admin">
-          {() => user && isAdmin ? <AdminDashboard /> : <Redirect to="/dashboard" />}
-        </Route>
-        <Route path="/admin/users">
-          {() => user && isAdmin ? <AdminUsers /> : <Redirect to="/dashboard" />}
-        </Route>
-        <Route path="/admin/users/:id">
-          {() => user && isAdmin ? <AdminUserDetail /> : <Redirect to="/dashboard" />}
-        </Route>
-        <Route path="/admin/transactions">
-          {() => user && isAdmin ? <AdminTransactions /> : <Redirect to="/dashboard" />}
-        </Route>
-        <Route path="/admin/trades">
-          {() => user && isAdmin ? <AdminTrades /> : <Redirect to="/dashboard" />}
-        </Route>
-        
-        <Route component={NotFound} />
-      </Switch>
-    </AppLayout>
+      <Route path="/dashboard">
+        {() => user ? <AppLayout><Dashboard /></AppLayout> : <Redirect to="/login" />}
+      </Route>
+      <Route path="/trade">
+        {() => user ? <AppLayout><TradeList /></AppLayout> : <Redirect to="/login" />}
+      </Route>
+      <Route path="/trade/:symbol">
+        {() => user ? <AppLayout><TradePage /></AppLayout> : <Redirect to="/login" />}
+      </Route>
+      <Route path="/history">
+        {() => user ? <AppLayout><History /></AppLayout> : <Redirect to="/login" />}
+      </Route>
+      <Route path="/wallet">
+        {() => user ? <AppLayout><Wallet /></AppLayout> : <Redirect to="/login" />}
+      </Route>
+      <Route path="/profile">
+        {() => user ? <AppLayout><Profile /></AppLayout> : <Redirect to="/login" />}
+      </Route>
+      <Route path="/notifications">
+        {() => user ? <AppLayout><Notifications /></AppLayout> : <Redirect to="/login" />}
+      </Route>
+
+      <Route path="/admin">
+        {() => user && isAdmin ? <AppLayout><AdminDashboard /></AppLayout> : <Redirect to="/dashboard" />}
+      </Route>
+      <Route path="/admin/users">
+        {() => user && isAdmin ? <AppLayout><AdminUsers /></AppLayout> : <Redirect to="/dashboard" />}
+      </Route>
+      <Route path="/admin/users/:id">
+        {() => user && isAdmin ? <AppLayout><AdminUserDetail /></AppLayout> : <Redirect to="/dashboard" />}
+      </Route>
+      <Route path="/admin/transactions">
+        {() => user && isAdmin ? <AppLayout><AdminTransactions /></AppLayout> : <Redirect to="/dashboard" />}
+      </Route>
+      <Route path="/admin/trades">
+        {() => user && isAdmin ? <AppLayout><AdminTrades /></AppLayout> : <Redirect to="/dashboard" />}
+      </Route>
+
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 

@@ -549,6 +549,35 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
 
+  /admin/users/{id}/wallet/reset:
+    post:
+      operationId: resetUserWallet
+      tags: [admin]
+      summary: Reset a user's wallet to zero
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: Wallet reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
   /admin/transactions:
     get:
       operationId: getAdminTransactions

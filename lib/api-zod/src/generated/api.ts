@@ -579,6 +579,34 @@ export const AdjustUserBalanceResponse = zod.object({
 
 
 /**
+ * @summary Reset a user's wallet to zero
+ */
+export const ResetUserWalletParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const ResetUserWalletBody = zod.object({
+  "reason": zod.string()
+})
+
+export const ResetUserWalletResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string().nullish(),
+  "role": zod.enum(['user', 'admin']),
+  "status": zod.enum(['active', 'frozen', 'banned']),
+  "balance": zod.number(),
+  "totalDeposited": zod.number().optional(),
+  "totalWithdrawn": zod.number().optional(),
+  "totalProfit": zod.number().optional(),
+  "totalLoss": zod.number().optional(),
+  "createdAt": zod.coerce.date(),
+  "lastLoginAt": zod.coerce.date().nullish()
+})
+
+
+/**
  * @summary Get all transactions (admin)
  */
 export const getAdminTransactionsQueryLimitDefault = 20;

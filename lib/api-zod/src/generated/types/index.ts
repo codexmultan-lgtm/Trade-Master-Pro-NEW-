@@ -42,6 +42,7 @@ export * from './notificationType';
 export * from './priceTick';
 export * from './registerInput';
 export * from './rejectionInput';
+export * from './resetUserWalletBody';
 export * from './trade';
 export * from './tradeDirection';
 export * from './tradeInput';

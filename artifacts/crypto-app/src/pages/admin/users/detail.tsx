@@ -1,5 +1,5 @@
 import { useParams } from "wouter";
-import { useGetAdminUser, useUpdateAdminUser, useAdjustUserBalance, getGetAdminUserQueryKey } from "@workspace/api-client-react";
+import { useGetAdminUser, useUpdateAdminUser, useAdjustUserBalance, useResetUserWallet, getGetAdminUserQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ export default function AdminUserDetail() {
   const [adjustAmount, setAdjustAmount] = useState("");
   const [adjustType, setAdjustType] = useState<"credit" | "debit">("credit");
   const [adjustReason, setAdjustReason] = useState("");
+  const [resetReason, setResetReason] = useState("");
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const updateStatus = useUpdateAdminUser({
     mutation: {
@@ -45,6 +47,20 @@ export default function AdminUserDetail() {
       },
       onError: (err: any) => {
         toast({ title: "Failed", description: err.message, variant: "destructive" });
+      }
+    }
+  });
+
+  const resetWallet = useResetUserWallet({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: "Wallet reset to $0.00", description: "All wallet fields cleared." });
+        queryClient.invalidateQueries({ queryKey: getGetAdminUserQueryKey(id as string) });
+        setResetReason("");
+        setShowResetConfirm(false);
+      },
+      onError: (err: any) => {
+        toast({ title: "Reset failed", description: err.message, variant: "destructive" });
       }
     }
   });
@@ -150,6 +166,54 @@ export default function AdminUserDetail() {
               {adjustBalance.isPending ? "Adjusting..." : "Submit Adjustment"}
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card className="border-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-destructive">Reset Wallet</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Zeroes out balance, total deposited, withdrawn, profit, and loss. This action cannot be undone.
+          </p>
+          {!showResetConfirm ? (
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={() => setShowResetConfirm(true)}
+            >
+              Reset Wallet to $0.00
+            </Button>
+          ) : (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label>Reason for reset</Label>
+                <Input
+                  placeholder="e.g. Fraud, New start, Admin correction"
+                  value={resetReason}
+                  onChange={e => setResetReason(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => { setShowResetConfirm(false); setResetReason(""); }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  disabled={!resetReason || resetWallet.isPending}
+                  onClick={() => resetWallet.mutate({ id: id as string, data: { reason: resetReason } })}
+                >
+                  {resetWallet.isPending ? "Resetting..." : "Confirm Reset"}
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

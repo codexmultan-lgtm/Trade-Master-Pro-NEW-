@@ -199,6 +199,39 @@ router.patch("/users/:id/balance", async (req: AuthRequest, res: Response) => {
   res.json(formatUser(user));
 });
 
+router.post("/users/:id/wallet/reset", async (req: AuthRequest, res: Response) => {
+  const user = await User.findById(req.params.id);
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+  const { reason } = req.body;
+  if (!reason) { res.status(400).json({ error: "reason is required" }); return; }
+
+  user.balance = 0;
+  user.totalDeposited = 0;
+  user.totalWithdrawn = 0;
+  user.totalProfit = 0;
+  user.totalLoss = 0;
+  await user.save();
+
+  await Transaction.create({
+    userId: user._id,
+    type: "adjustment",
+    amount: 0,
+    status: "approved",
+    notes: `Admin wallet reset: ${reason}`,
+  });
+
+  await Notification.create({
+    userId: user._id,
+    type: "balance_adjustment",
+    title: "Wallet Reset",
+    message: `Your wallet has been reset to $0.00 by admin. Reason: ${reason}`,
+    data: { type: "reset", reason },
+  });
+
+  res.json(formatUser(user));
+});
+
 // ─── TRANSACTIONS ─────────────────────────────────────────────
 router.get("/transactions", async (req: AuthRequest, res: Response) => {
   const { type, status, userId, limit = "20", page = "1" } = req.query as Record<string, string>;
