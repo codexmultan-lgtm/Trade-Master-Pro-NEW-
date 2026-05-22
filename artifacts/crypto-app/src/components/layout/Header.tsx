@@ -50,7 +50,7 @@ export function Header() {
           </Button>
         ) : (
           <div className="font-bold text-lg tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mr-2">
-            CryptoTrade
+            DualTrade
           </div>
         )}
         
