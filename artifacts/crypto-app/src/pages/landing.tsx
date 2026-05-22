@@ -591,11 +591,11 @@ function Footer() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-6 text-sm text-white/40">
-            <span>Demo Trading Platform</span>
+            <span>Trusted Trading Platform</span>
             <span>·</span>
-            <span>Virtual Balances Only</span>
+            <span>Instant Withrawls</span>
             <span>·</span>
-            <span>Not Financial Advice</span>
+            <span>Live Binary Trades</span>
           </div>
 
           <div className="flex items-center gap-4">
