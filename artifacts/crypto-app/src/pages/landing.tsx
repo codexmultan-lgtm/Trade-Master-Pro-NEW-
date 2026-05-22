@@ -592,7 +592,7 @@ function Footer() {
           <div className="flex flex-wrap justify-center gap-6 text-sm text-white/40">
             <span>Trusted Trading Platform</span>
             <span>·</span>
-            <span>Instant Withrawls</span>
+            <span>Instant Withdrawls</span>
             <span>·</span>
             <span>Live Binary Trades</span>
           </div>
