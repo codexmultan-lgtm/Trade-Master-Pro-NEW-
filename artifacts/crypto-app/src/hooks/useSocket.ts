@@ -15,10 +15,9 @@ export function useSocket() {
   useEffect(() => {
     // Only connect if we have a token
     const token = localStorage.getItem("crypto_token");
-    const url = new URL(window.location.href);
-    const origin = url.origin;
-    
-    socketRef.current = io(origin, {
+    const API_URL = import.meta.env.VITE_API_URL;
+
+     socketRef.current = io(API_URL, {
       path: "/socket.io",
       auth: { token },
       autoConnect: true,
