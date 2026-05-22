@@ -120,8 +120,8 @@ export default function TradePage() {
         </div>
       </div>
 
-      <div className="flex-1 w-full relative min-h-[300px]">
-        {candles.length > 0 && <CandleChart data={candles} symbol={symbol!} />}
+      <div style={{ height: "320px", flexShrink: 0 }} className="w-full relative bg-[#0d1117]">
+        <CandleChart data={candles} symbol={symbol!} />
       </div>
 
       {symbolActiveTrades.length > 0 && (

@@ -15,16 +15,8 @@ export function CandleChart({ data, symbol }: CandleChartProps) {
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
-    const handleResize = () => {
-      if (chartRef.current && chartContainerRef.current) {
-        chartRef.current.applyOptions({
-          width: chartContainerRef.current.clientWidth,
-          height: chartContainerRef.current.clientHeight,
-        });
-      }
-    };
-
     const chart = createChart(chartContainerRef.current, {
+      autoSize: true,
       layout: {
         background: { type: ColorType.Solid, color: "#0d1117" },
         textColor: "#94a3b8",
@@ -33,11 +25,13 @@ export function CandleChart({ data, symbol }: CandleChartProps) {
         vertLines: { color: "#1e2328" },
         horzLines: { color: "#1e2328" },
       },
-      width: chartContainerRef.current.clientWidth,
-      height: chartContainerRef.current.clientHeight,
       timeScale: {
         timeVisible: true,
         secondsVisible: false,
+        borderColor: "#1e2328",
+      },
+      rightPriceScale: {
+        borderColor: "#1e2328",
       },
       crosshair: {
         mode: 1,
@@ -55,29 +49,29 @@ export function CandleChart({ data, symbol }: CandleChartProps) {
     chartRef.current = chart;
     seriesRef.current = candlestickSeries;
 
-    window.addEventListener("resize", handleResize);
-
     return () => {
-      window.removeEventListener("resize", handleResize);
       chart.remove();
+      chartRef.current = null;
+      seriesRef.current = null;
     };
   }, []);
 
   useEffect(() => {
-    if (seriesRef.current && data.length > 0) {
-      const formattedData = data
-        .map((d) => ({
-          time: d.time as Time,
-          open: d.open,
-          high: d.high,
-          low: d.low,
-          close: d.close,
-        }))
-        .sort((a, b) => (a.time as number) - (b.time as number));
+    if (!seriesRef.current || data.length === 0) return;
 
-      seriesRef.current.setData(formattedData);
-    }
+    const formattedData = data
+      .map((d) => ({
+        time: d.time as Time,
+        open: d.open,
+        high: d.high,
+        low: d.low,
+        close: d.close,
+      }))
+      .sort((a, b) => (a.time as number) - (b.time as number));
+
+    seriesRef.current.setData(formattedData);
+    chartRef.current?.timeScale().fitContent();
   }, [data]);
 
-  return <div ref={chartContainerRef} className="w-full h-full" />;
+  return <div ref={chartContainerRef} style={{ width: "100%", height: "100%" }} />;
 }
