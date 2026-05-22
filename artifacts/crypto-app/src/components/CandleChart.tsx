@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { createChart, ColorType, IChartApi, ISeriesApi, Time } from "lightweight-charts";
+import { createChart, ColorType, CandlestickSeries, IChartApi, ISeriesApi, Time } from "lightweight-charts";
 import { Candle } from "@workspace/api-client-react";
 
 interface CandleChartProps {
@@ -44,7 +44,7 @@ export function CandleChart({ data, symbol }: CandleChartProps) {
       },
     });
 
-    const candlestickSeries = chart.addCandlestickSeries({
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
       upColor: "#00c076",
       downColor: "#ff3a3a",
       borderVisible: false,
@@ -65,14 +65,16 @@ export function CandleChart({ data, symbol }: CandleChartProps) {
 
   useEffect(() => {
     if (seriesRef.current && data.length > 0) {
-      const formattedData = data.map((d) => ({
-        time: d.time as Time,
-        open: d.open,
-        high: d.high,
-        low: d.low,
-        close: d.close,
-      })).sort((a, b) => (a.time as number) - (b.time as number));
-      
+      const formattedData = data
+        .map((d) => ({
+          time: d.time as Time,
+          open: d.open,
+          high: d.high,
+          low: d.low,
+          close: d.close,
+        }))
+        .sort((a, b) => (a.time as number) - (b.time as number));
+
       seriesRef.current.setData(formattedData);
     }
   }, [data]);
