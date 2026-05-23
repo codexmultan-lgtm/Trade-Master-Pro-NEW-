@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "wouter";
 import { useListCandles, useGetCurrentPrice, usePlaceTrade, useGetActiveTrades, getGetActiveTradesQueryKey, useGetWallet, getGetWalletQueryKey, Candle } from "@workspace/api-client-react";
+import { formatPKR, formatMarketPrice } from "@/lib/currency";
 import { CandleChart } from "@/components/CandleChart";
 import { Button } from "@/components/ui/button";
 import { useSocket } from "@/hooks/useSocket";
@@ -80,7 +81,7 @@ export default function TradePage() {
       queryClient.invalidateQueries({ queryKey: getGetWalletQueryKey() });
       toast({
         title: `Trade ${data.result.toUpperCase()}`,
-        description: `Trade settled. P&L: $${data.profitLoss.toFixed(2)}`,
+        description: `Trade settled. P&L: ${formatPKR(data.profitLoss)}`,
         variant: data.profitLoss > 0 ? "default" : "destructive"
       });
     });
@@ -116,7 +117,11 @@ export default function TradePage() {
       <div className="p-4 border-b border-border flex justify-between items-center bg-card">
         <h1 className="text-xl font-bold tracking-tight">{symbol}</h1>
         <div className="text-right">
-          <div className="text-2xl font-bold">${currentPrice?.toFixed(2) || "---"}</div>
+          <div className="text-2xl font-bold">
+            {currentPrice
+              ? formatMarketPrice(currentPrice, symbol?.replace(/^(BTC|ETH|BNB)/, "") ?? "USDT")
+              : "---"}
+          </div>
         </div>
       </div>
 
@@ -131,9 +136,11 @@ export default function TradePage() {
               <div className="flex justify-between items-center mb-1">
                 <span className={`flex items-center text-xs font-bold ${trade.direction === 'up' ? 'text-primary' : 'text-destructive'}`}>
                   {trade.direction === 'up' ? <ArrowUp className="w-3 h-3 mr-1" /> : <ArrowDown className="w-3 h-3 mr-1" />}
-                  ${trade.amount.toFixed(2)}
+                  {formatPKR(trade.amount)}
                 </span>
-                <span className="text-xs text-muted-foreground">Entry: ${trade.entryPrice.toFixed(2)}</span>
+                <span className="text-xs text-muted-foreground">
+                  Entry: {formatMarketPrice(trade.entryPrice, symbol?.replace(/^(BTC|ETH|BNB)/, "") ?? "USDT")}
+                </span>
               </div>
             </div>
           ))}

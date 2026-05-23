@@ -48,6 +48,8 @@ import type {
   TradeInput,
   TradeList,
   TradeResultInput,
+  TradeSetting,
+  TradeSettingInput,
   TradeStats,
   Transaction,
   TransactionList,
@@ -2191,6 +2193,154 @@ export const useResetUserWallet = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getResetUserWalletMutationOptions(options));
+    }
+
+export const getGetTradeSettingsUrl = () => {
+
+
+
+
+  return `/api/admin/trade-settings`
+}
+
+/**
+ * @summary Get per-symbol trade outcome settings
+ */
+export const getTradeSettings = async ( options?: RequestInit): Promise<TradeSetting[]> => {
+
+  return customFetch<TradeSetting[]>(getGetTradeSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTradeSettingsQueryKey = () => {
+    return [
+    `/api/admin/trade-settings`
+    ] as const;
+    }
+
+
+export const getGetTradeSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getTradeSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTradeSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTradeSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTradeSettings>>> = ({ signal }) => getTradeSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTradeSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTradeSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getTradeSettings>>>
+export type GetTradeSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get per-symbol trade outcome settings
+ */
+
+export function useGetTradeSettings<TData = Awaited<ReturnType<typeof getTradeSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTradeSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTradeSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSetTradeSettingUrl = () => {
+
+
+
+
+  return `/api/admin/trade-settings`
+}
+
+/**
+ * @summary Set outcome bias for a symbol
+ */
+export const setTradeSetting = async (tradeSettingInput: TradeSettingInput, options?: RequestInit): Promise<TradeSetting> => {
+
+  return customFetch<TradeSetting>(getSetTradeSettingUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      tradeSettingInput,)
+  }
+);}
+
+
+
+
+export const getSetTradeSettingMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setTradeSetting>>, TError,{data: BodyType<TradeSettingInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setTradeSetting>>, TError,{data: BodyType<TradeSettingInput>}, TContext> => {
+
+const mutationKey = ['setTradeSetting'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setTradeSetting>>, {data: BodyType<TradeSettingInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  setTradeSetting(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetTradeSettingMutationResult = NonNullable<Awaited<ReturnType<typeof setTradeSetting>>>
+    export type SetTradeSettingMutationBody = BodyType<TradeSettingInput>
+    export type SetTradeSettingMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Set outcome bias for a symbol
+ */
+export const useSetTradeSetting = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setTradeSetting>>, TError,{data: BodyType<TradeSettingInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setTradeSetting>>,
+        TError,
+        {data: BodyType<TradeSettingInput>},
+        TContext
+      > => {
+      return useMutation(getSetTradeSettingMutationOptions(options));
     }
 
 export const getGetAdminTransactionsUrl = (params?: GetAdminTransactionsParams,) => {

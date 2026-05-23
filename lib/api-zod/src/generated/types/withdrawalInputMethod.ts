@@ -11,6 +11,9 @@ export type WithdrawalInputMethod = typeof WithdrawalInputMethod[keyof typeof Wi
 
 export const WithdrawalInputMethod = {
   bank_transfer: 'bank_transfer',
+  easypaisa: 'easypaisa',
+  sadapay: 'sadapay',
+  nayapay: 'nayapay',
+  jazzcash: 'jazzcash',
   crypto: 'crypto',
-  upi: 'upi',
 } as const;

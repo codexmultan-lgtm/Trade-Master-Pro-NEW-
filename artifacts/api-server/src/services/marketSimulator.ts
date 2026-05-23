@@ -4,11 +4,13 @@ import { Server as SocketServer } from "socket.io";
 import { logger } from "../lib/logger.js";
 
 const INITIAL_PRICES: Record<string, { price: number; base: string; quote: string }> = {
-  BTCUSDT: { price: 67450, base: "BTC", quote: "USDT" },
-  BTCINR:  { price: 5621000, base: "BTC", quote: "INR" },
-  ETHUSDT: { price: 3520, base: "ETH", quote: "USDT" },
-  ETHINR:  { price: 293200, base: "ETH", quote: "INR" },
-  BNBUSDT: { price: 612, base: "BNB", quote: "USDT" },
+  BTCUSDT: { price: 67450,      base: "BTC", quote: "USDT" },
+  BTCINR:  { price: 5621000,    base: "BTC", quote: "INR"  },
+  ETHUSDT: { price: 3520,       base: "ETH", quote: "USDT" },
+  ETHINR:  { price: 293200,     base: "ETH", quote: "INR"  },
+  BNBUSDT: { price: 612,        base: "BNB", quote: "USDT" },
+  BTCPKR:  { price: 18900000,   base: "BTC", quote: "PKR"  },
+  BNBPKR:  { price: 171000,     base: "BNB", quote: "PKR"  },
 };
 
 const VOLATILITY: Record<string, number> = {
@@ -17,6 +19,8 @@ const VOLATILITY: Record<string, number> = {
   ETHUSDT: 0.0010,
   ETHINR:  0.0010,
   BNBUSDT: 0.0012,
+  BTCPKR:  0.0008,
+  BNBPKR:  0.0012,
 };
 
 const currentPrices: Record<string, number> = {};

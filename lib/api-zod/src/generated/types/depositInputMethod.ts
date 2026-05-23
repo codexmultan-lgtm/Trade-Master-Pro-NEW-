@@ -11,6 +11,9 @@ export type DepositInputMethod = typeof DepositInputMethod[keyof typeof DepositI
 
 export const DepositInputMethod = {
   bank_transfer: 'bank_transfer',
+  easypaisa: 'easypaisa',
+  sadapay: 'sadapay',
+  nayapay: 'nayapay',
+  jazzcash: 'jazzcash',
   crypto: 'crypto',
-  upi: 'upi',
 } as const;

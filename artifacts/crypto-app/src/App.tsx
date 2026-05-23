@@ -42,47 +42,47 @@ function Router() {
   return (
     <Switch>
       <Route path="/">
-        {user ? <Redirect to="/dashboard" /> : <Landing />}
+        {user ? (isAdmin ? <Redirect to="/admin" /> : <Redirect to="/dashboard" />) : <Landing />}
       </Route>
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
 
       <Route path="/dashboard">
-        {() => user ? <AppLayout><Dashboard /></AppLayout> : <Redirect to="/login" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <Redirect to="/admin" /> : <AppLayout><Dashboard /></AppLayout>}
       </Route>
       <Route path="/trade">
-        {() => user ? <AppLayout><TradeList /></AppLayout> : <Redirect to="/login" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <Redirect to="/admin" /> : <AppLayout><TradeList /></AppLayout>}
       </Route>
       <Route path="/trade/:symbol">
-        {() => user ? <AppLayout><TradePage /></AppLayout> : <Redirect to="/login" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <Redirect to="/admin" /> : <AppLayout><TradePage /></AppLayout>}
       </Route>
       <Route path="/history">
-        {() => user ? <AppLayout><History /></AppLayout> : <Redirect to="/login" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <Redirect to="/admin" /> : <AppLayout><History /></AppLayout>}
       </Route>
       <Route path="/wallet">
-        {() => user ? <AppLayout><Wallet /></AppLayout> : <Redirect to="/login" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <Redirect to="/admin" /> : <AppLayout><Wallet /></AppLayout>}
       </Route>
       <Route path="/profile">
-        {() => user ? <AppLayout><Profile /></AppLayout> : <Redirect to="/login" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <Redirect to="/admin" /> : <AppLayout><Profile /></AppLayout>}
       </Route>
       <Route path="/notifications">
-        {() => user ? <AppLayout><Notifications /></AppLayout> : <Redirect to="/login" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <Redirect to="/admin" /> : <AppLayout><Notifications /></AppLayout>}
       </Route>
 
       <Route path="/admin">
-        {() => user && isAdmin ? <AppLayout><AdminDashboard /></AppLayout> : <Redirect to="/dashboard" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <AppLayout><AdminDashboard /></AppLayout> : <Redirect to="/dashboard" />}
       </Route>
       <Route path="/admin/users">
-        {() => user && isAdmin ? <AppLayout><AdminUsers /></AppLayout> : <Redirect to="/dashboard" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <AppLayout><AdminUsers /></AppLayout> : <Redirect to="/dashboard" />}
       </Route>
       <Route path="/admin/users/:id">
-        {() => user && isAdmin ? <AppLayout><AdminUserDetail /></AppLayout> : <Redirect to="/dashboard" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <AppLayout><AdminUserDetail /></AppLayout> : <Redirect to="/dashboard" />}
       </Route>
       <Route path="/admin/transactions">
-        {() => user && isAdmin ? <AppLayout><AdminTransactions /></AppLayout> : <Redirect to="/dashboard" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <AppLayout><AdminTransactions /></AppLayout> : <Redirect to="/dashboard" />}
       </Route>
       <Route path="/admin/trades">
-        {() => user && isAdmin ? <AppLayout><AdminTrades /></AppLayout> : <Redirect to="/dashboard" />}
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <AppLayout><AdminTrades /></AppLayout> : <Redirect to="/dashboard" />}
       </Route>
 
       <Route component={NotFound} />

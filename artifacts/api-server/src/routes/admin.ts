@@ -5,6 +5,7 @@ import { User } from "../models/User.js";
 import { Transaction } from "../models/Transaction.js";
 import { Trade } from "../models/Trade.js";
 import { Notification } from "../models/Notification.js";
+import { TradeSetting } from "../models/TradeSetting.js";
 
 const router = Router();
 router.use(authMiddleware, adminMiddleware);
@@ -404,6 +405,30 @@ router.patch("/trades/:id/result", async (req: AuthRequest, res: Response) => {
 
   const u = await User.findById(trade.userId);
   res.json(formatTrade(trade, { email: u?.email, name: u?.name }));
+});
+
+// ─── TRADE SETTINGS ─────────────────────────────────────────────────────────
+const ALL_SYMBOLS = ["BTCUSDT", "BTCINR", "ETHUSDT", "ETHINR", "BNBUSDT", "BTCPKR", "BNBPKR"];
+
+router.get("/trade-settings", async (_req: AuthRequest, res: Response) => {
+  const settings = await TradeSetting.find({});
+  const settingsMap = Object.fromEntries(settings.map((s) => [s.symbol, s.outcome]));
+  const result = ALL_SYMBOLS.map((sym) => ({ symbol: sym, outcome: settingsMap[sym] ?? "auto" }));
+  res.json(result);
+});
+
+router.post("/trade-settings", async (req: AuthRequest, res: Response) => {
+  const { symbol, outcome } = req.body;
+  if (!symbol || !["auto", "win", "loss"].includes(outcome)) {
+    res.status(400).json({ error: "symbol and outcome (auto|win|loss) required" });
+    return;
+  }
+  const setting = await TradeSetting.findOneAndUpdate(
+    { symbol },
+    { outcome },
+    { upsert: true, new: true }
+  );
+  res.json({ symbol: setting.symbol, outcome: setting.outcome });
 });
 
 export default router;

@@ -40,6 +40,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("crypto_user", JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
+    if (newUser.role === "admin") {
+      setLocation("/admin");
+    } else {
+      setLocation("/dashboard");
+    }
   };
 
   const logout = () => {

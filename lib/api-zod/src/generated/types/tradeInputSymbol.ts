@@ -15,4 +15,6 @@ export const TradeInputSymbol = {
   ETHUSDT: 'ETHUSDT',
   ETHINR: 'ETHINR',
   BNBUSDT: 'BNBUSDT',
+  BTCPKR: 'BTCPKR',
+  BNBPKR: 'BNBPKR',
 } as const;

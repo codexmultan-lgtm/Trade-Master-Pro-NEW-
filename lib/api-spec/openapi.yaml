@@ -578,6 +578,38 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
 
+  /admin/trade-settings:
+    get:
+      operationId: getTradeSettings
+      tags: [admin]
+      summary: Get per-symbol trade outcome settings
+      responses:
+        "200":
+          description: List of trade settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TradeSetting"
+    post:
+      operationId: setTradeSetting
+      tags: [admin]
+      summary: Set outcome bias for a symbol
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TradeSettingInput"
+      responses:
+        "200":
+          description: Updated setting
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeSetting"
+
   /admin/transactions:
     get:
       operationId: getAdminTransactions
@@ -844,7 +876,7 @@ components:
           minimum: 1
         method:
           type: string
-          enum: [bank_transfer, crypto, upi]
+          enum: [bank_transfer, easypaisa, sadapay, nayapay, jazzcash, crypto]
         proofUrl:
           type: ["string", "null"]
         notes:
@@ -859,7 +891,7 @@ components:
           minimum: 1
         method:
           type: string
-          enum: [bank_transfer, crypto, upi]
+          enum: [bank_transfer, easypaisa, sadapay, nayapay, jazzcash, crypto]
         accountDetails:
           type: string
 
@@ -922,7 +954,7 @@ components:
       properties:
         symbol:
           type: string
-          enum: [BTCUSDT, BTCINR, ETHUSDT, ETHINR, BNBUSDT]
+          enum: [BTCUSDT, BTCINR, ETHUSDT, ETHINR, BNBUSDT, BTCPKR, BNBPKR]
         direction:
           type: string
           enum: [up, down]
@@ -1200,3 +1232,23 @@ components:
       properties:
         reason:
           type: string
+
+    TradeSetting:
+      type: object
+      required: [symbol, outcome]
+      properties:
+        symbol:
+          type: string
+        outcome:
+          type: string
+          enum: [auto, win, loss]
+
+    TradeSettingInput:
+      type: object
+      required: [symbol, outcome]
+      properties:
+        symbol:
+          type: string
+        outcome:
+          type: string
+          enum: [auto, win, loss]

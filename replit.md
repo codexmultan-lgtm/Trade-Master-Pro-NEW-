@@ -47,18 +47,23 @@ A full-stack mobile-first binary demo trading platform with real-time price feed
 
 - **Admin-controlled deposits/withdrawals**: All deposits and withdrawals are pending until admin approves. Balance is only modified on approval.
 - **Binary options**: Trade amount is deducted immediately on entry. Settlement restores amount + profit (win) or writes off amount (loss).
-- **Simulated markets**: 5 pairs (BTCUSDT, BTCINR, ETHUSDT, ETHINR, BNBUSDT) with random walk prices. Candles stored per minute in MongoDB.
+- **Simulated markets**: 7 pairs (BTCUSDT, BTCINR, ETHUSDT, ETHINR, BNBUSDT, BTCPKR, BNBPKR) with random walk prices. Candles stored per minute in MongoDB.
+- **Trade outcome control**: `TradeSetting` collection stores per-symbol outcome override. Admin sets `auto` (price-based), `win`, or `loss` via `POST /api/admin/trade-settings`.
 - **Socket.IO rooms**: Users join `user_<id>` for private trade settlement notifications, and `symbol_<sym>` for price/candle updates.
 - **No Drizzle/PostgreSQL**: This project uses MongoDB/Mongoose (not the default Drizzle stack). `lib/db` is not used.
 
 ## Product
 
-- Users register and get $10,000 virtual balance
-- Deposit/withdrawal requests go to admin for approval
-- Markets page shows 5 live crypto pairs with real-time price ticks
+- Users register with ₨0 PKR virtual balance; deposit/withdrawal requests go to admin for approval
+- All wallet balances and trade amounts shown in PKR (₨)
+- Pakistani payment methods: EasyPaisa, JazzCash, SadaPay, NayaPay, Bank Transfer, Crypto
+- Markets page shows 7 live crypto pairs (incl. BTC/PKR + BNB/PKR) with real-time price ticks
+- PKR pairs: BTCPKR (~₨18,900,000), BNBPKR (~₨171,000)
 - Trade page shows 1-minute candlestick chart + "Buy UP / Buy DOWN" flow with 60/120/180/240s timers
 - Profit percentages: 60s=85%, 120s=80%, 180s=75%, 240s=70%
-- Admin dashboard: manage users (freeze/unfreeze, balance adjustment), approve/reject transactions, force trade outcomes
+- Admin dashboard: manage users (freeze/unfreeze, balance adjustment, wallet reset), approve/reject transactions, force trade outcomes
+- Admin trade outcome control: per-symbol AUTO / FORCE WIN / FORCE LOSS toggle (overrides price-based settlement)
+- Admin login redirects directly to /admin — user pages are blocked for admin accounts
 
 ## User preferences
 

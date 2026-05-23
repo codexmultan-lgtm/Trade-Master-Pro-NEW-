@@ -94,7 +94,13 @@ function LiveTicker() {
           return (
             <span key={i} className="inline-flex items-center gap-2 text-sm font-mono">
               <span className="text-white/60">{m.symbol}</span>
-              <span className="text-white font-semibold">${Number(price).toFixed(2)}</span>
+              <span className="text-white font-semibold">
+                {m.symbol?.endsWith("PKR")
+                  ? "₨" + Number(price).toLocaleString("en-PK", { maximumFractionDigits: 0 })
+                  : m.symbol?.endsWith("INR")
+                  ? "₹" + Number(price).toLocaleString("en-IN", { maximumFractionDigits: 0 })
+                  : "$" + Number(price).toFixed(2)}
+              </span>
               <span className={isUp ? "text-emerald-400" : "text-red-400"}>
                 {isUp ? <TrendingUp className="w-3 h-3 inline" /> : <TrendingDown className="w-3 h-3 inline" />}
                 {" "}{isUp ? "+" : ""}{change.toFixed(2)}%

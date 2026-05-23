@@ -130,8 +130,11 @@ export type DepositInputMethod = typeof DepositInputMethod[keyof typeof DepositI
 
 export const DepositInputMethod = {
   bank_transfer: 'bank_transfer',
+  easypaisa: 'easypaisa',
+  sadapay: 'sadapay',
+  nayapay: 'nayapay',
+  jazzcash: 'jazzcash',
   crypto: 'crypto',
-  upi: 'upi',
 } as const;
 
 export interface DepositInput {
@@ -149,8 +152,11 @@ export type WithdrawalInputMethod = typeof WithdrawalInputMethod[keyof typeof Wi
 
 export const WithdrawalInputMethod = {
   bank_transfer: 'bank_transfer',
+  easypaisa: 'easypaisa',
+  sadapay: 'sadapay',
+  nayapay: 'nayapay',
+  jazzcash: 'jazzcash',
   crypto: 'crypto',
-  upi: 'upi',
 } as const;
 
 export interface WithdrawalInput {
@@ -176,6 +182,8 @@ export const TradeInputSymbol = {
   ETHUSDT: 'ETHUSDT',
   ETHINR: 'ETHINR',
   BNBUSDT: 'BNBUSDT',
+  BTCPKR: 'BTCPKR',
+  BNBPKR: 'BNBPKR',
 } as const;
 
 export type TradeInputDirection = typeof TradeInputDirection[keyof typeof TradeInputDirection];
@@ -409,6 +417,34 @@ export interface BalanceAdjustment {
 
 export interface RejectionInput {
   reason?: string;
+}
+
+export type TradeSettingOutcome = typeof TradeSettingOutcome[keyof typeof TradeSettingOutcome];
+
+
+export const TradeSettingOutcome = {
+  auto: 'auto',
+  win: 'win',
+  loss: 'loss',
+} as const;
+
+export interface TradeSetting {
+  symbol: string;
+  outcome: TradeSettingOutcome;
+}
+
+export type TradeSettingInputOutcome = typeof TradeSettingInputOutcome[keyof typeof TradeSettingInputOutcome];
+
+
+export const TradeSettingInputOutcome = {
+  auto: 'auto',
+  win: 'win',
+  loss: 'loss',
+} as const;
+
+export interface TradeSettingInput {
+  symbol: string;
+  outcome: TradeSettingInputOutcome;
 }
 
 export type GetTransactionsParams = {

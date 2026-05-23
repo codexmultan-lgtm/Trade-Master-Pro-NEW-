@@ -1,5 +1,6 @@
 import { useParams } from "wouter";
 import { useGetAdminUser, useUpdateAdminUser, useAdjustUserBalance, useResetUserWallet, getGetAdminUserQueryKey } from "@workspace/api-client-react";
+import { formatPKR } from "@/lib/currency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -107,19 +108,19 @@ export default function AdminUserDetail() {
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
             <div>
               <div className="text-xs text-muted-foreground">Balance</div>
-              <div className="font-bold text-xl">${user.balance.toFixed(2)}</div>
+              <div className="font-bold text-xl text-emerald-400">{formatPKR(user.balance)}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground">Total Deposited</div>
-              <div className="font-medium">${user.totalDeposited.toFixed(2)}</div>
+              <div className="font-medium">{formatPKR(user.totalDeposited)}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground">Total Profit</div>
-              <div className="font-medium text-primary">${user.totalProfit.toFixed(2)}</div>
+              <div className="font-medium text-primary">{formatPKR(user.totalProfit)}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground">Total Loss</div>
-              <div className="font-medium text-destructive">${user.totalLoss.toFixed(2)}</div>
+              <div className="font-medium text-destructive">{formatPKR(user.totalLoss)}</div>
             </div>
           </div>
 
@@ -233,7 +234,7 @@ export default function AdminUserDetail() {
                   <div className="text-xs text-muted-foreground">{format(new Date(trade.createdAt), "MMM d, HH:mm")}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm font-medium">${trade.amount.toFixed(2)}</div>
+                  <div className="text-sm font-medium">{formatPKR(trade.amount)}</div>
                   <Badge
                     variant={trade.status === 'active' ? 'outline' : trade.status === 'win' ? 'default' : 'destructive'}
                     className={`text-xs ${trade.status === 'win' ? 'bg-primary' : ''}`}
@@ -258,7 +259,7 @@ export default function AdminUserDetail() {
                   <div className="text-xs text-muted-foreground">{format(new Date(tx.createdAt), "MMM d, HH:mm")}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm font-medium">${tx.amount.toFixed(2)}</div>
+                  <div className="text-sm font-medium">{formatPKR(tx.amount)}</div>
                   <Badge
                     variant={tx.status === 'pending' ? 'outline' : tx.status === 'approved' ? 'default' : 'destructive'}
                     className={`text-xs ${tx.status === 'approved' ? 'bg-primary' : ''}`}

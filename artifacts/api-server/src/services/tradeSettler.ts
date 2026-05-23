@@ -2,6 +2,7 @@ import { Trade } from "../models/Trade.js";
 import { Transaction } from "../models/Transaction.js";
 import { Notification } from "../models/Notification.js";
 import { User } from "../models/User.js";
+import { TradeSetting } from "../models/TradeSetting.js";
 import { Server as SocketServer } from "socket.io";
 import { getCurrentPrice } from "./marketSimulator.js";
 import { logger } from "../lib/logger.js";
@@ -21,9 +22,18 @@ export async function settlePendingTrades(): Promise<void> {
       const exitPrice = getCurrentPrice(trade.symbol);
       if (!exitPrice) continue;
 
-      const isWin = trade.direction === "up"
-        ? exitPrice > trade.entryPrice
-        : exitPrice < trade.entryPrice;
+      const setting = await TradeSetting.findOne({ symbol: trade.symbol });
+      const forcedOutcome = setting?.outcome ?? "auto";
+      let isWin: boolean;
+      if (forcedOutcome === "win") {
+        isWin = true;
+      } else if (forcedOutcome === "loss") {
+        isWin = false;
+      } else {
+        isWin = trade.direction === "up"
+          ? exitPrice > trade.entryPrice
+          : exitPrice < trade.entryPrice;
+      }
 
       const profitLoss = isWin
         ? trade.amount * (trade.profitPercent / 100)

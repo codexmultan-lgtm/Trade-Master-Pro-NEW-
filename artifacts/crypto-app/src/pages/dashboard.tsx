@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useGetWallet, useGetTradeStats } from "@workspace/api-client-react";
+import { formatPKR } from "@/lib/currency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -21,7 +22,7 @@ export default function Dashboard() {
         <Card className="bg-card border-border">
           <CardContent className="p-6">
             <div className="text-sm font-medium text-muted-foreground mb-1">Total Balance</div>
-            <div className="text-3xl font-bold">${wallet?.balance?.toFixed(2) || "0.00"}</div>
+            <div className="text-3xl font-bold text-emerald-400">{formatPKR(wallet?.balance ?? 0)}</div>
             
             <div className="flex gap-4 mt-6">
               <Link href="/wallet" className="flex-1">
@@ -71,7 +72,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className={`text-2xl font-bold ${stats && stats.netPnl >= 0 ? 'text-primary' : 'text-destructive'}`}>
-                {stats && stats.netPnl >= 0 ? '+' : ''}${stats?.netPnl?.toFixed(2) || "0.00"}
+                {stats && stats.netPnl >= 0 ? '+' : ''}{formatPKR(stats?.netPnl ?? 0)}
               </div>
             </CardContent>
           </Card>
@@ -109,7 +110,7 @@ export default function Dashboard() {
                     tx.type === 'withdrawal' || tx.type === 'trade_loss' ? 'text-destructive' : 
                     'text-foreground'
                   }`}>
-                    {tx.type === 'deposit' || tx.type === 'trade_win' ? '+' : '-'}${tx.amount.toFixed(2)}
+                    {tx.type === 'deposit' || tx.type === 'trade_win' ? '+' : '-'}{formatPKR(tx.amount)}
                   </div>
                   <div className="text-[10px] uppercase text-muted-foreground">{tx.status}</div>
                 </div>

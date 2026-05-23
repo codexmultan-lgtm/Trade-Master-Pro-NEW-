@@ -133,7 +133,7 @@ export const GetWalletResponse = zod.object({
 
 export const RequestDepositBody = zod.object({
   "amount": zod.number().min(1),
-  "method": zod.enum(['bank_transfer', 'crypto', 'upi']),
+  "method": zod.enum(['bank_transfer', 'easypaisa', 'sadapay', 'nayapay', 'jazzcash', 'crypto']),
   "proofUrl": zod.string().nullish(),
   "notes": zod.string().nullish()
 })
@@ -147,7 +147,7 @@ export const RequestDepositBody = zod.object({
 
 export const RequestWithdrawalBody = zod.object({
   "amount": zod.number().min(1),
-  "method": zod.enum(['bank_transfer', 'crypto', 'upi']),
+  "method": zod.enum(['bank_transfer', 'easypaisa', 'sadapay', 'nayapay', 'jazzcash', 'crypto']),
   "accountDetails": zod.string()
 })
 
@@ -195,7 +195,7 @@ export const GetTransactionsResponse = zod.object({
 
 
 export const PlaceTradeBody = zod.object({
-  "symbol": zod.enum(['BTCUSDT', 'BTCINR', 'ETHUSDT', 'ETHINR', 'BNBUSDT']),
+  "symbol": zod.enum(['BTCUSDT', 'BTCINR', 'ETHUSDT', 'ETHINR', 'BNBUSDT', 'BTCPKR', 'BNBPKR']),
   "direction": zod.enum(['up', 'down']),
   "amount": zod.number().min(1),
   "duration": zod.union([zod.literal(60),zod.literal(120),zod.literal(180),zod.literal(240)]).describe('Trade duration in seconds')
@@ -603,6 +603,30 @@ export const ResetUserWalletResponse = zod.object({
   "totalLoss": zod.number().optional(),
   "createdAt": zod.coerce.date(),
   "lastLoginAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary Get per-symbol trade outcome settings
+ */
+export const GetTradeSettingsResponseItem = zod.object({
+  "symbol": zod.string(),
+  "outcome": zod.enum(['auto', 'win', 'loss'])
+})
+export const GetTradeSettingsResponse = zod.array(GetTradeSettingsResponseItem)
+
+
+/**
+ * @summary Set outcome bias for a symbol
+ */
+export const SetTradeSettingBody = zod.object({
+  "symbol": zod.string(),
+  "outcome": zod.enum(['auto', 'win', 'loss'])
+})
+
+export const SetTradeSettingResponse = zod.object({
+  "symbol": zod.string(),
+  "outcome": zod.enum(['auto', 'win', 'loss'])
 })
 
 

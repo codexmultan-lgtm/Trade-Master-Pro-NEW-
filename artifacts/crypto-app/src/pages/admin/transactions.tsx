@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useGetAdminTransactions, useApproveTransaction, useRejectTransaction, getGetAdminTransactionsQueryKey } from "@workspace/api-client-react";
+import { formatPKR } from "@/lib/currency";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -76,7 +77,7 @@ export default function AdminTransactions() {
                     <div className="text-xs text-muted-foreground">{tx.method}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold">${tx.amount.toFixed(2)}</div>
+                    <div className="font-bold">{formatPKR(tx.amount)}</div>
                     <Badge
                       variant={tx.status === 'pending' ? 'outline' : tx.status === 'approved' ? 'default' : 'destructive'}
                       className={tx.status === 'approved' ? 'bg-primary' : ''}

@@ -1,4 +1,5 @@
 import { useGetMarkets } from "@workspace/api-client-react";
+import { formatMarketPrice, formatPKR } from "@/lib/currency";
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
@@ -81,7 +82,7 @@ export default function TradeList() {
                   </div>
                   
                   <div className="text-right">
-                    <div className="font-bold text-lg">${market.lastPrice?.toFixed(2) || "0.00"}</div>
+                    <div className="font-bold text-lg">{formatMarketPrice(market.lastPrice ?? 0, market.quoteAsset)}</div>
                     <div className={`text-xs flex items-center justify-end font-medium ${isPositive ? 'text-primary' : 'text-destructive'}`}>
                       {isPositive ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
                       {isPositive ? '+' : ''}{market.change24h?.toFixed(2) || "0.00"}%

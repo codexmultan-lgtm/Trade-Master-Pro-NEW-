@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
+import { formatPKR } from "@/lib/currency";
 
 export default function History() {
   const { data: historyData, isLoading } = useGetTradeHistory({ limit: 50 });
@@ -42,16 +43,16 @@ export default function History() {
                 <div className="grid grid-cols-3 gap-2 text-sm mt-4 p-3 bg-secondary/50 rounded-lg">
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Amount</div>
-                    <div className="font-medium">${trade.amount.toFixed(2)}</div>
+                    <div className="font-medium">{formatPKR(trade.amount)}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground mb-1">Entry Price</div>
-                    <div className="font-medium">${trade.entryPrice.toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground mb-1">Entry</div>
+                    <div className="font-medium text-xs">{trade.entryPrice.toLocaleString()}</div>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">P&L</div>
                     <div className={`font-bold ${trade.profitLoss && trade.profitLoss > 0 ? 'text-primary' : trade.profitLoss && trade.profitLoss < 0 ? 'text-destructive' : ''}`}>
-                      {trade.profitLoss && trade.profitLoss > 0 ? '+' : ''}{trade.profitLoss?.toFixed(2) || '0.00'}
+                      {trade.profitLoss ? (trade.profitLoss > 0 ? '+' : '') + formatPKR(trade.profitLoss) : '—'}
                     </div>
                   </div>
                 </div>
