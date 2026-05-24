@@ -750,7 +750,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Trade"
 
-  /api/settings:
+  /settings:
     get:
       operationId: getSettings
       summary: Get platform settings (public)
@@ -763,7 +763,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PlatformSettings"
 
-  /api/admin/platform-settings:
+  /admin/platform-settings:
     get:
       operationId: getAdminPlatformSettings
       summary: Get platform settings (admin)

@@ -2732,7 +2732,7 @@ export const getGetSettingsUrl = () => {
 
 
 
-  return `/api/api/settings`
+  return `/api/settings`
 }
 
 /**
@@ -2755,7 +2755,7 @@ export const getSettings = async ( options?: RequestInit): Promise<PlatformSetti
 
 export const getGetSettingsQueryKey = () => {
     return [
-    `/api/api/settings`
+    `/api/settings`
     ] as const;
     }
 
@@ -2809,7 +2809,7 @@ export const getGetAdminPlatformSettingsUrl = () => {
 
 
 
-  return `/api/api/admin/platform-settings`
+  return `/api/admin/platform-settings`
 }
 
 /**
@@ -2832,7 +2832,7 @@ export const getAdminPlatformSettings = async ( options?: RequestInit): Promise<
 
 export const getGetAdminPlatformSettingsQueryKey = () => {
     return [
-    `/api/api/admin/platform-settings`
+    `/api/admin/platform-settings`
     ] as const;
     }
 
@@ -2886,7 +2886,7 @@ export const getUpdatePlatformSettingsUrl = () => {
 
 
 
-  return `/api/api/admin/platform-settings`
+  return `/api/admin/platform-settings`
 }
 
 /**
