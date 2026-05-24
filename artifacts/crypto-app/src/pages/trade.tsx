@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "wouter";
 import { useListCandles, useGetCurrentPrice, usePlaceTrade, useGetActiveTrades, getGetActiveTradesQueryKey, useGetWallet, getGetWalletQueryKey, Candle } from "@workspace/api-client-react";
-import { formatPKR, formatMarketPrice } from "@/lib/currency";
+import { formatMarketPrice } from "@/lib/currency";
 import { symbolToDisplay, getQuoteAsset } from "@/lib/symbols";
+import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
 import { CandleChart } from "@/components/CandleChart";
 import { Button } from "@/components/ui/button";
 import { useSocket } from "@/hooks/useSocket";
@@ -15,19 +16,30 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export default function TradePage() {
   const { symbol } = useParams();
+  const { currencySymbol, minTradeAmount, maxTradeAmount, profit60s, profit120s, profit180s, profit240s } = usePlatformSettings();
   const [candles, setCandles] = useState<Candle[]>([]);
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [tradeDirection, setTradeDirection] = useState<'up' | 'down'>('up');
-  const [amount, setAmount] = useState("10");
+  const [amount, setAmount] = useState(String(minTradeAmount));
   const [duration, setDuration] = useState("60");
+
+  const quickPicks = useMemo(() => {
+    const min = minTradeAmount;
+    const max = maxTradeAmount;
+    const picks = [min, min * 2, min * 5, min * 10].filter(v => v <= max);
+    if (picks.length < 4 && picks[picks.length - 1] !== max) picks.push(max);
+    return picks.slice(0, 4).map(String);
+  }, [minTradeAmount, maxTradeAmount]);
+
+  const profitMap: Record<string, number> = { "60": profit60s, "120": profit120s, "180": profit180s, "240": profit240s };
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { subscribe } = useSocket();
 
-  const { data: initialCandles } = useListCandles(symbol as any, { query: { enabled: !!symbol } });
-  const { data: priceData } = useGetCurrentPrice(symbol as any, { query: { enabled: !!symbol } });
+  const { data: initialCandles } = useListCandles(symbol as any, undefined, { query: { enabled: !!symbol, queryKey: ['candles', symbol] as const } });
+  const { data: priceData } = useGetCurrentPrice(symbol as any, { query: { enabled: !!symbol, queryKey: ['price', symbol] as const } });
   const { data: activeTrades } = useGetActiveTrades();
   
   const placeTrade = usePlaceTrade({
@@ -43,6 +55,10 @@ export default function TradePage() {
       }
     }
   });
+
+  useEffect(() => {
+    setAmount(String(minTradeAmount));
+  }, [minTradeAmount]);
 
   useEffect(() => {
     if (initialCandles) {
@@ -80,10 +96,11 @@ export default function TradePage() {
     const unsubTrade = subscribe("trade_settled", (data) => {
       queryClient.invalidateQueries({ queryKey: getGetActiveTradesQueryKey() });
       queryClient.invalidateQueries({ queryKey: getGetWalletQueryKey() });
+      const pl = data.profitLoss as number;
       toast({
         title: `Trade ${data.result.toUpperCase()}`,
-        description: `Trade settled. P&L: ${formatPKR(data.profitLoss)}`,
-        variant: data.profitLoss > 0 ? "default" : "destructive"
+        description: `Trade settled. P&L: ${currencySymbol}${Math.abs(pl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        variant: pl > 0 ? "default" : "destructive"
       });
     });
 
@@ -137,7 +154,7 @@ export default function TradePage() {
               <div className="flex justify-between items-center mb-1">
                 <span className={`flex items-center text-xs font-bold ${trade.direction === 'up' ? 'text-primary' : 'text-destructive'}`}>
                   {trade.direction === 'up' ? <ArrowUp className="w-3 h-3 mr-1" /> : <ArrowDown className="w-3 h-3 mr-1" />}
-                  {formatPKR(trade.amount)}
+                  {currencySymbol}{trade.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   Entry: {formatMarketPrice(trade.entryPrice, getQuoteAsset(symbol ?? "BTCUSDT"))}
@@ -180,30 +197,35 @@ export default function TradePage() {
                 <TabsTrigger value="240">240s</TabsTrigger>
               </TabsList>
               <div className="text-center mt-2 text-sm font-medium text-accent">
-                Profit: {duration === '60' ? '85%' : duration === '120' ? '80%' : duration === '180' ? '75%' : '70%'}
+                Profit: {profitMap[duration]}%
               </div>
             </Tabs>
 
             <div className="space-y-3">
               <label className="text-sm font-medium text-muted-foreground">Investment Amount</label>
               <div className="flex gap-2">
-                {['10', '25', '50', '100'].map(val => (
+                {quickPicks.map(val => (
                   <Button 
                     key={val} 
                     variant={amount === val ? "default" : "outline"} 
-                    className="flex-1"
+                    className="flex-1 text-xs"
                     onClick={() => setAmount(val)}
                   >
-                    ${val}
+                    {currencySymbol}{Number(val).toLocaleString()}
                   </Button>
                 ))}
               </div>
               <Input 
                 type="number" 
                 value={amount} 
-                onChange={(e) => setAmount(e.target.value)} 
+                onChange={(e) => setAmount(e.target.value)}
+                min={minTradeAmount}
+                max={maxTradeAmount}
                 className="text-center text-lg font-bold h-12"
               />
+              <p className="text-xs text-muted-foreground text-center">
+                Min: {currencySymbol}{minTradeAmount.toLocaleString()} — Max: {currencySymbol}{maxTradeAmount.toLocaleString()}
+              </p>
             </div>
 
             <Button 
