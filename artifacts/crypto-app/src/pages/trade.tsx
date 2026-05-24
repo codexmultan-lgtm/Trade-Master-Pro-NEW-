@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "wouter";
 import { useListCandles, useGetCurrentPrice, usePlaceTrade, useGetActiveTrades, getGetActiveTradesQueryKey, useGetWallet, getGetWalletQueryKey, Candle } from "@workspace/api-client-react";
 import { formatPKR, formatMarketPrice } from "@/lib/currency";
+import { symbolToDisplay, getQuoteAsset } from "@/lib/symbols";
 import { CandleChart } from "@/components/CandleChart";
 import { Button } from "@/components/ui/button";
 import { useSocket } from "@/hooks/useSocket";
@@ -115,11 +116,11 @@ export default function TradePage() {
   return (
     <div className="flex flex-col h-full bg-background relative">
       <div className="p-4 border-b border-border flex justify-between items-center bg-card">
-        <h1 className="text-xl font-bold tracking-tight">{symbol}</h1>
+        <h1 className="text-xl font-bold tracking-tight">{symbolToDisplay(symbol ?? "")}</h1>
         <div className="text-right">
           <div className="text-2xl font-bold">
             {currentPrice
-              ? formatMarketPrice(currentPrice, symbol?.replace(/^(BTC|ETH|BNB)/, "") ?? "USDT")
+              ? formatMarketPrice(currentPrice, getQuoteAsset(symbol ?? "BTCUSDT"))
               : "---"}
           </div>
         </div>
@@ -139,7 +140,7 @@ export default function TradePage() {
                   {formatPKR(trade.amount)}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Entry: {formatMarketPrice(trade.entryPrice, symbol?.replace(/^(BTC|ETH|BNB)/, "") ?? "USDT")}
+                  Entry: {formatMarketPrice(trade.entryPrice, getQuoteAsset(symbol ?? "BTCUSDT"))}
                 </span>
               </div>
             </div>

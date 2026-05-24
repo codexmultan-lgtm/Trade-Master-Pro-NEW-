@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
 import { formatPKR } from "@/lib/currency";
+import { symbolToDisplay } from "@/lib/symbols";
 
 export default function History() {
   const { data: historyData, isLoading } = useGetTradeHistory({ limit: 50 });
@@ -30,7 +31,7 @@ export default function History() {
                       {trade.direction === 'up' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
                     </div>
                     <div>
-                      <div className="font-bold text-sm">{trade.symbol}</div>
+                      <div className="font-bold text-sm">{symbolToDisplay(trade.symbol)}</div>
                       <div className="text-xs text-muted-foreground">{format(new Date(trade.createdAt), 'MMM dd, HH:mm')}</div>
                     </div>
                   </div>

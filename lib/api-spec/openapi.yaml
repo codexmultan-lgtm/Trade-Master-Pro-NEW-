@@ -750,6 +750,53 @@ paths:
               schema:
                 $ref: "#/components/schemas/Trade"
 
+  /api/settings:
+    get:
+      operationId: getSettings
+      summary: Get platform settings (public)
+      tags: [Settings]
+      responses:
+        "200":
+          description: Platform settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformSettings"
+
+  /api/admin/platform-settings:
+    get:
+      operationId: getAdminPlatformSettings
+      summary: Get platform settings (admin)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Platform settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformSettings"
+    post:
+      operationId: updatePlatformSettings
+      summary: Update platform settings (admin)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlatformSettingsInput"
+      responses:
+        "200":
+          description: Updated platform settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformSettings"
+
 components:
   schemas:
     HealthStatus:
@@ -954,7 +1001,7 @@ components:
       properties:
         symbol:
           type: string
-          enum: [BTCUSDT, BTCINR, ETHUSDT, ETHINR, BNBUSDT, BTCPKR, BNBPKR]
+          enum: [BTCUSDT, BTCPKR, BTCINR, ETHUSDT, ETHPKR, ETHINR, BNBUSDT, BNBPKR, USDTPKR, USDTINR]
         direction:
           type: string
           enum: [up, down]
@@ -1252,3 +1299,58 @@ components:
         outcome:
           type: string
           enum: [auto, win, loss]
+
+    PlatformSettings:
+      type: object
+      required: [currency, currencySymbol, profit60s, profit120s, profit180s, profit240s, lossPercent, minTradeAmount, maxTradeAmount, enabledSymbols]
+      properties:
+        currency:
+          type: string
+          enum: [PKR, USD, INR, GBP]
+        currencySymbol:
+          type: string
+        profit60s:
+          type: number
+        profit120s:
+          type: number
+        profit180s:
+          type: number
+        profit240s:
+          type: number
+        lossPercent:
+          type: number
+        minTradeAmount:
+          type: number
+        maxTradeAmount:
+          type: number
+        enabledSymbols:
+          type: array
+          items:
+            type: string
+
+    PlatformSettingsInput:
+      type: object
+      properties:
+        currency:
+          type: string
+          enum: [PKR, USD, INR, GBP]
+        currencySymbol:
+          type: string
+        profit60s:
+          type: number
+        profit120s:
+          type: number
+        profit180s:
+          type: number
+        profit240s:
+          type: number
+        lossPercent:
+          type: number
+        minTradeAmount:
+          type: number
+        maxTradeAmount:
+          type: number
+        enabledSymbols:
+          type: array
+          items:
+            type: string

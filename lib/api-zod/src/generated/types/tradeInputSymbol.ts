@@ -11,10 +11,13 @@ export type TradeInputSymbol = typeof TradeInputSymbol[keyof typeof TradeInputSy
 
 export const TradeInputSymbol = {
   BTCUSDT: 'BTCUSDT',
+  BTCPKR: 'BTCPKR',
   BTCINR: 'BTCINR',
   ETHUSDT: 'ETHUSDT',
+  ETHPKR: 'ETHPKR',
   ETHINR: 'ETHINR',
   BNBUSDT: 'BNBUSDT',
-  BTCPKR: 'BTCPKR',
   BNBPKR: 'BNBPKR',
+  USDTPKR: 'USDTPKR',
+  USDTINR: 'USDTINR',
 } as const;

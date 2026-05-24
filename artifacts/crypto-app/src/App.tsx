@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { PlatformSettingsProvider } from "@/contexts/PlatformSettingsContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import NotFound from "@/pages/not-found";
 
@@ -22,6 +23,7 @@ import AdminUsers from "@/pages/admin/users/index";
 import AdminUserDetail from "@/pages/admin/users/detail";
 import AdminTransactions from "@/pages/admin/transactions";
 import AdminTrades from "@/pages/admin/trades";
+import AdminSettings from "@/pages/admin/settings";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +86,9 @@ function Router() {
       <Route path="/admin/trades">
         {() => !user ? <Redirect to="/login" /> : isAdmin ? <AppLayout><AdminTrades /></AppLayout> : <Redirect to="/dashboard" />}
       </Route>
+      <Route path="/admin/settings">
+        {() => !user ? <Redirect to="/login" /> : isAdmin ? <AppLayout><AdminSettings /></AppLayout> : <Redirect to="/dashboard" />}
+      </Route>
 
       <Route component={NotFound} />
     </Switch>
@@ -96,7 +101,9 @@ function App() {
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <AuthProvider>
-            <Router />
+            <PlatformSettingsProvider>
+              <Router />
+            </PlatformSettingsProvider>
           </AuthProvider>
         </WouterRouter>
         <Toaster />

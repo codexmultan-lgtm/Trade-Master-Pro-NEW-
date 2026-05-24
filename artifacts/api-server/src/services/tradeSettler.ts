@@ -35,9 +35,10 @@ export async function settlePendingTrades(): Promise<void> {
           : exitPrice < trade.entryPrice;
       }
 
+      const lossPercent = (trade as any).lossPercent ?? 100;
       const profitLoss = isWin
         ? trade.amount * (trade.profitPercent / 100)
-        : -trade.amount;
+        : -(trade.amount * (lossPercent / 100));
 
       trade.exitPrice = exitPrice;
       trade.profitLoss = profitLoss;
@@ -59,24 +60,28 @@ export async function settlePendingTrades(): Promise<void> {
           notes: `Trade win: ${trade.symbol} ${trade.direction.toUpperCase()}`,
         });
       } else {
-        user.totalLoss += trade.amount;
+        const actualLoss = trade.amount * (lossPercent / 100);
+        const refund = trade.amount - actualLoss;
+        if (refund > 0) user.balance += refund;
+        user.totalLoss += actualLoss;
         await Transaction.create({
           userId: user._id,
           type: "trade_loss",
-          amount: trade.amount,
+          amount: actualLoss,
           status: "approved",
-          notes: `Trade loss: ${trade.symbol} ${trade.direction.toUpperCase()}`,
+          notes: `Trade loss: ${trade.symbol} ${trade.direction.toUpperCase()} (${lossPercent}% loss)`,
         });
       }
       await user.save();
 
+      const profitAbs = Math.abs(profitLoss).toFixed(2);
       await Notification.create({
         userId: user._id,
         type: "trade_result",
         title: isWin ? "Trade Won!" : "Trade Lost",
         message: isWin
-          ? `Your ${trade.symbol} ${trade.direction.toUpperCase()} trade won! Profit: $${profitLoss.toFixed(2)}`
-          : `Your ${trade.symbol} ${trade.direction.toUpperCase()} trade closed at a loss of $${trade.amount.toFixed(2)}`,
+          ? `Your ${trade.symbol} ${trade.direction.toUpperCase()} trade won! Profit: ${profitAbs}`
+          : `Your ${trade.symbol} ${trade.direction.toUpperCase()} trade closed at a loss of ${profitAbs}`,
         data: { tradeId: trade._id, result: trade.status, exitPrice, profitLoss },
       });
 
@@ -90,7 +95,7 @@ export async function settlePendingTrades(): Promise<void> {
         io.to(`user_${trade.userId}`).emit("notification", {
           type: "trade_result",
           title: isWin ? "Trade Won!" : "Trade Lost",
-          message: isWin ? `Profit: $${profitLoss.toFixed(2)}` : `Loss: $${trade.amount.toFixed(2)}`,
+          message: isWin ? `Profit: ${profitAbs}` : `Loss: ${profitAbs}`,
         });
       }
 

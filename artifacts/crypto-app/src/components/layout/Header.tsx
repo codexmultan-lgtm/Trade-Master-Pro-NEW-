@@ -9,7 +9,7 @@ import { useSocket } from "@/hooks/useSocket";
 
 export function Header() {
   const [location, setLocation] = useLocation();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const { data: unreadCount } = useGetUnreadNotificationCount({
     query: { enabled: !!user }
   });
@@ -69,8 +69,8 @@ export function Header() {
           </Button>
         )}
         {isAdminRoute && (
-          <Button variant="outline" size="sm" className="h-8 text-xs font-medium" onClick={() => setLocation("/dashboard")}>
-            Exit Admin
+          <Button variant="outline" size="sm" className="h-8 text-xs font-medium border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => logout()}>
+            Logout
           </Button>
         )}
         

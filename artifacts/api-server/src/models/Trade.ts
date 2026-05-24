@@ -25,6 +25,7 @@ const TradeSchema = new Schema<ITrade>(
     amount: { type: Number, required: true },
     duration: { type: Number, enum: [60, 120, 180, 240], required: true },
     profitPercent: { type: Number, required: true },
+    lossPercent: { type: Number, default: 100 },
     entryPrice: { type: Number, required: true },
     exitPrice: { type: Number },
     profitLoss: { type: Number },

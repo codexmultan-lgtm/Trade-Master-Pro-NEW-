@@ -9,8 +9,11 @@ const INITIAL_PRICES: Record<string, { price: number; base: string; quote: strin
   ETHUSDT: { price: 3520,       base: "ETH", quote: "USDT" },
   ETHINR:  { price: 293200,     base: "ETH", quote: "INR"  },
   BNBUSDT: { price: 612,        base: "BNB", quote: "USDT" },
-  BTCPKR:  { price: 18900000,   base: "BTC", quote: "PKR"  },
-  BNBPKR:  { price: 171000,     base: "BNB", quote: "PKR"  },
+  BTCPKR:  { price: 18900000,   base: "BTC",  quote: "PKR"  },
+  BNBPKR:  { price: 171000,     base: "BNB",  quote: "PKR"  },
+  ETHPKR:  { price: 986000,     base: "ETH",  quote: "PKR"  },
+  USDTPKR: { price: 280,        base: "USDT", quote: "PKR"  },
+  USDTINR: { price: 83,         base: "USDT", quote: "INR"  },
 };
 
 const VOLATILITY: Record<string, number> = {
@@ -21,6 +24,9 @@ const VOLATILITY: Record<string, number> = {
   BNBUSDT: 0.0012,
   BTCPKR:  0.0008,
   BNBPKR:  0.0012,
+  ETHPKR:  0.0010,
+  USDTPKR: 0.0002,
+  USDTINR: 0.0002,
 };
 
 const currentPrices: Record<string, number> = {};

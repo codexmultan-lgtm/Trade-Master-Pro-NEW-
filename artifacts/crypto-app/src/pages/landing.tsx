@@ -213,7 +213,7 @@ function HeroSection() {
           custom={2}
           className="text-lg sm:text-xl text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed"
         >
-          Real-time candlestick charts, 5 crypto pairs, and instant UP/DOWN binary trades.
+          Real-time candlestick charts, 10 crypto pairs, and instant UP/DOWN binary trades.
           Earn up to 85% profit on winning positions.
         </motion.p>
 
@@ -245,7 +245,7 @@ function HeroSection() {
           className="mt-16 grid grid-cols-3 gap-8 max-w-md mx-auto"
         >
           {[
-            { value: "5", label: "Crypto Pairs" },
+            { value: "10", label: "Crypto Pairs" },
             { value: "85%", label: "Max Profit" },
             { value: "2s", label: "Price Updates" },
           ].map((stat) => (
@@ -277,10 +277,10 @@ function HeroSection() {
 
 function FeaturesSection() {
   const features = [
-    { icon: BarChart2, title: "Live Candlestick Charts", desc: "Professional TradingView charts with real-time 1-minute candles for all 5 crypto pairs.", color: "emerald" },
+    { icon: BarChart2, title: "Live Candlestick Charts", desc: "Professional TradingView charts with real-time 1-minute candles for all 10 crypto pairs.", color: "emerald" },
     { icon: Zap, title: "Instant Trade Settlement", desc: "Trades auto-settle in 60–240 seconds. Win up to 85% profit on correct direction calls.", color: "yellow" },
     { icon: Shield, title: "Secure JWT Auth", desc: "Bank-grade JWT authentication with encrypted passwords. Your account, your control.", color: "blue" },
-    { icon: Globe, title: "5 Crypto Pairs", desc: "BTC/USDT, BTC/INR, ETH/USDT, ETH/INR, BNB/USDT — all live with socket-powered updates.", color: "purple" },
+    { icon: Globe, title: "10 Crypto Pairs", desc: "BTC/PKR, BTC/INR, ETH/PKR, ETH/INR, USDT/PKR, USDT/INR and more — all live with socket-powered real-time updates.", color: "purple" },
     { icon: Wallet, title: "Virtual Wallet", desc: "Deposit and withdraw with admin approval. Full transaction history with real-time notifications.", color: "cyan" },
     { icon: Bell, title: "Real-Time Notifications", desc: "Socket.IO powered trade settlements, deposit approvals, and balance updates delivered instantly.", color: "rose" },
   ];
@@ -520,7 +520,7 @@ function AboutSection() {
           <AnimatedSection>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { label: "Total Pairs", value: "5", sub: "Live markets" },
+                { label: "Total Pairs", value: "10", sub: "Live markets" },
                 { label: "Max Return", value: "85%", sub: "60s trades" },
                 { label: "Settlement", value: "Auto", sub: "Every 3 seconds" },
                 { label: "Stack", value: "MERN", sub: "Full-stack" },

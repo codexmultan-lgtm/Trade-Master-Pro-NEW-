@@ -195,7 +195,7 @@ export const GetTransactionsResponse = zod.object({
 
 
 export const PlaceTradeBody = zod.object({
-  "symbol": zod.enum(['BTCUSDT', 'BTCINR', 'ETHUSDT', 'ETHINR', 'BNBUSDT', 'BTCPKR', 'BNBPKR']),
+  "symbol": zod.enum(['BTCUSDT', 'BTCPKR', 'BTCINR', 'ETHUSDT', 'ETHPKR', 'ETHINR', 'BNBUSDT', 'BNBPKR', 'USDTPKR', 'USDTINR']),
   "direction": zod.enum(['up', 'down']),
   "amount": zod.number().min(1),
   "duration": zod.union([zod.literal(60),zod.literal(120),zod.literal(180),zod.literal(240)]).describe('Trade duration in seconds')
@@ -787,6 +787,70 @@ export const SetTradeResultResponse = zod.object({
   "expiresAt": zod.coerce.date().optional(),
   "settledAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get platform settings (public)
+ */
+export const GetSettingsResponse = zod.object({
+  "currency": zod.enum(['PKR', 'USD', 'INR', 'GBP']),
+  "currencySymbol": zod.string(),
+  "profit60s": zod.number(),
+  "profit120s": zod.number(),
+  "profit180s": zod.number(),
+  "profit240s": zod.number(),
+  "lossPercent": zod.number(),
+  "minTradeAmount": zod.number(),
+  "maxTradeAmount": zod.number(),
+  "enabledSymbols": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Get platform settings (admin)
+ */
+export const GetAdminPlatformSettingsResponse = zod.object({
+  "currency": zod.enum(['PKR', 'USD', 'INR', 'GBP']),
+  "currencySymbol": zod.string(),
+  "profit60s": zod.number(),
+  "profit120s": zod.number(),
+  "profit180s": zod.number(),
+  "profit240s": zod.number(),
+  "lossPercent": zod.number(),
+  "minTradeAmount": zod.number(),
+  "maxTradeAmount": zod.number(),
+  "enabledSymbols": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Update platform settings (admin)
+ */
+export const UpdatePlatformSettingsBody = zod.object({
+  "currency": zod.enum(['PKR', 'USD', 'INR', 'GBP']).optional(),
+  "currencySymbol": zod.string().optional(),
+  "profit60s": zod.number().optional(),
+  "profit120s": zod.number().optional(),
+  "profit180s": zod.number().optional(),
+  "profit240s": zod.number().optional(),
+  "lossPercent": zod.number().optional(),
+  "minTradeAmount": zod.number().optional(),
+  "maxTradeAmount": zod.number().optional(),
+  "enabledSymbols": zod.array(zod.string()).optional()
+})
+
+export const UpdatePlatformSettingsResponse = zod.object({
+  "currency": zod.enum(['PKR', 'USD', 'INR', 'GBP']),
+  "currencySymbol": zod.string(),
+  "profit60s": zod.number(),
+  "profit120s": zod.number(),
+  "profit180s": zod.number(),
+  "profit240s": zod.number(),
+  "lossPercent": zod.number(),
+  "minTradeAmount": zod.number(),
+  "maxTradeAmount": zod.number(),
+  "enabledSymbols": zod.array(zod.string())
 })
 
 

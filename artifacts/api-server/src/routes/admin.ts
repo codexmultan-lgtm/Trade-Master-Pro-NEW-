@@ -6,6 +6,7 @@ import { Transaction } from "../models/Transaction.js";
 import { Trade } from "../models/Trade.js";
 import { Notification } from "../models/Notification.js";
 import { TradeSetting } from "../models/TradeSetting.js";
+import { PlatformSettings, getOrCreateSettings, formatSettings, CURRENCY_SYMBOLS } from "../models/PlatformSettings.js";
 
 const router = Router();
 router.use(authMiddleware, adminMiddleware);
@@ -407,8 +408,48 @@ router.patch("/trades/:id/result", async (req: AuthRequest, res: Response) => {
   res.json(formatTrade(trade, { email: u?.email, name: u?.name }));
 });
 
+// ─── PLATFORM SETTINGS ───────────────────────────────────────────────────────
+router.get("/platform-settings", async (_req: AuthRequest, res: Response) => {
+  const settings = await getOrCreateSettings();
+  res.json(formatSettings(settings));
+});
+
+router.post("/platform-settings", async (req: AuthRequest, res: Response) => {
+  const {
+    currency, currencySymbol,
+    profit60s, profit120s, profit180s, profit240s,
+    lossPercent, minTradeAmount, maxTradeAmount, enabledSymbols,
+  } = req.body;
+
+  const update: Record<string, unknown> = {};
+  if (currency) {
+    update.currency = currency;
+    update.currencySymbol = currencySymbol || CURRENCY_SYMBOLS[currency] || currency;
+  }
+  if (typeof profit60s  === "number") update.profit60s  = profit60s;
+  if (typeof profit120s === "number") update.profit120s = profit120s;
+  if (typeof profit180s === "number") update.profit180s = profit180s;
+  if (typeof profit240s === "number") update.profit240s = profit240s;
+  if (typeof lossPercent    === "number") update.lossPercent    = lossPercent;
+  if (typeof minTradeAmount === "number") update.minTradeAmount = minTradeAmount;
+  if (typeof maxTradeAmount === "number") update.maxTradeAmount = maxTradeAmount;
+  if (Array.isArray(enabledSymbols)) update.enabledSymbols = enabledSymbols;
+
+  const settings = await PlatformSettings.findOneAndUpdate(
+    {},
+    { $set: update },
+    { new: true, upsert: true }
+  );
+  res.json(formatSettings(settings!));
+});
+
 // ─── TRADE SETTINGS ─────────────────────────────────────────────────────────
-const ALL_SYMBOLS = ["BTCUSDT", "BTCINR", "ETHUSDT", "ETHINR", "BNBUSDT", "BTCPKR", "BNBPKR"];
+const ALL_SYMBOLS = [
+  "BTCUSDT","BTCPKR","BTCINR",
+  "ETHUSDT","ETHPKR","ETHINR",
+  "BNBUSDT","BNBPKR",
+  "USDTPKR","USDTINR",
+];
 
 router.get("/trade-settings", async (_req: AuthRequest, res: Response) => {
   const settings = await TradeSetting.find({});

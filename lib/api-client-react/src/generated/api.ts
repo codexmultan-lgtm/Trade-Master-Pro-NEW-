@@ -40,6 +40,8 @@ import type {
   LoginInput,
   Market,
   Notification,
+  PlatformSettings,
+  PlatformSettingsInput,
   PriceTick,
   RegisterInput,
   RejectionInput,
@@ -2723,5 +2725,230 @@ export const useSetTradeResult = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getSetTradeResultMutationOptions(options));
+    }
+
+export const getGetSettingsUrl = () => {
+
+
+
+
+  return `/api/api/settings`
+}
+
+/**
+ * @summary Get platform settings (public)
+ */
+export const getSettings = async ( options?: RequestInit): Promise<PlatformSettings> => {
+
+  return customFetch<PlatformSettings>(getGetSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSettingsQueryKey = () => {
+    return [
+    `/api/api/settings`
+    ] as const;
+    }
+
+
+export const getGetSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSettings>>> = ({ signal }) => getSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getSettings>>>
+export type GetSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get platform settings (public)
+ */
+
+export function useGetSettings<TData = Awaited<ReturnType<typeof getSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetAdminPlatformSettingsUrl = () => {
+
+
+
+
+  return `/api/api/admin/platform-settings`
+}
+
+/**
+ * @summary Get platform settings (admin)
+ */
+export const getAdminPlatformSettings = async ( options?: RequestInit): Promise<PlatformSettings> => {
+
+  return customFetch<PlatformSettings>(getGetAdminPlatformSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAdminPlatformSettingsQueryKey = () => {
+    return [
+    `/api/api/admin/platform-settings`
+    ] as const;
+    }
+
+
+export const getGetAdminPlatformSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getAdminPlatformSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminPlatformSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminPlatformSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminPlatformSettings>>> = ({ signal }) => getAdminPlatformSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminPlatformSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAdminPlatformSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminPlatformSettings>>>
+export type GetAdminPlatformSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get platform settings (admin)
+ */
+
+export function useGetAdminPlatformSettings<TData = Awaited<ReturnType<typeof getAdminPlatformSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAdminPlatformSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAdminPlatformSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdatePlatformSettingsUrl = () => {
+
+
+
+
+  return `/api/api/admin/platform-settings`
+}
+
+/**
+ * @summary Update platform settings (admin)
+ */
+export const updatePlatformSettings = async (platformSettingsInput: PlatformSettingsInput, options?: RequestInit): Promise<PlatformSettings> => {
+
+  return customFetch<PlatformSettings>(getUpdatePlatformSettingsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      platformSettingsInput,)
+  }
+);}
+
+
+
+
+export const getUpdatePlatformSettingsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlatformSettings>>, TError,{data: BodyType<PlatformSettingsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePlatformSettings>>, TError,{data: BodyType<PlatformSettingsInput>}, TContext> => {
+
+const mutationKey = ['updatePlatformSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePlatformSettings>>, {data: BodyType<PlatformSettingsInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updatePlatformSettings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePlatformSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof updatePlatformSettings>>>
+    export type UpdatePlatformSettingsMutationBody = BodyType<PlatformSettingsInput>
+    export type UpdatePlatformSettingsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update platform settings (admin)
+ */
+export const useUpdatePlatformSettings = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlatformSettings>>, TError,{data: BodyType<PlatformSettingsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updatePlatformSettings>>,
+        TError,
+        {data: BodyType<PlatformSettingsInput>},
+        TContext
+      > => {
+      return useMutation(getUpdatePlatformSettingsMutationOptions(options));
     }
 

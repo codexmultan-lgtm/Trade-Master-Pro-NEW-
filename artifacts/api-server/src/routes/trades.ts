@@ -4,12 +4,10 @@ import { authMiddleware, checkFrozen, AuthRequest } from "../middlewares/auth.js
 import { User } from "../models/User.js";
 import { Trade } from "../models/Trade.js";
 import { getCurrentPrice } from "../services/marketSimulator.js";
+import { getOrCreateSettings } from "../models/PlatformSettings.js";
 
 const router = Router();
 router.use(authMiddleware);
-
-const PROFIT_PERCENTAGES: Record<number, number> = { 60: 85, 120: 80, 180: 75, 240: 70 };
-const VALID_SYMBOLS = ["BTCUSDT", "BTCINR", "ETHUSDT", "ETHINR", "BNBUSDT"];
 
 function formatTrade(trade: InstanceType<typeof Trade>, user?: { email?: string; name?: string }) {
   return {
@@ -38,10 +36,6 @@ router.post("/", checkFrozen, async (req: AuthRequest, res: Response) => {
     res.status(400).json({ error: "symbol, direction, amount, duration required" });
     return;
   }
-  if (!VALID_SYMBOLS.includes(symbol)) {
-    res.status(400).json({ error: "Invalid symbol" });
-    return;
-  }
   if (!["up", "down"].includes(direction)) {
     res.status(400).json({ error: "direction must be up or down" });
     return;
@@ -52,6 +46,21 @@ router.post("/", checkFrozen, async (req: AuthRequest, res: Response) => {
   }
   if (amount <= 0) {
     res.status(400).json({ error: "amount must be positive" });
+    return;
+  }
+
+  const platformSettings = await getOrCreateSettings();
+
+  if (!platformSettings.enabledSymbols.includes(symbol)) {
+    res.status(400).json({ error: "Invalid or disabled trading pair" });
+    return;
+  }
+  if (amount < platformSettings.minTradeAmount) {
+    res.status(400).json({ error: `Minimum trade amount is ${platformSettings.minTradeAmount}` });
+    return;
+  }
+  if (amount > platformSettings.maxTradeAmount) {
+    res.status(400).json({ error: `Maximum trade amount is ${platformSettings.maxTradeAmount}` });
     return;
   }
 
@@ -68,7 +77,14 @@ router.post("/", checkFrozen, async (req: AuthRequest, res: Response) => {
     return;
   }
 
-  const profitPercent = PROFIT_PERCENTAGES[Number(duration)] ?? 80;
+  const profitMap: Record<number, number> = {
+    60:  platformSettings.profit60s,
+    120: platformSettings.profit120s,
+    180: platformSettings.profit180s,
+    240: platformSettings.profit240s,
+  };
+  const profitPercent = profitMap[Number(duration)] ?? platformSettings.profit60s;
+  const lossPercent   = platformSettings.lossPercent;
   const expiresAt = new Date(Date.now() + Number(duration) * 1000);
 
   user.balance -= amount;
@@ -78,6 +94,7 @@ router.post("/", checkFrozen, async (req: AuthRequest, res: Response) => {
     userId: req.userId,
     symbol,
     direction,
+    lossPercent,
     amount,
     duration: Number(duration),
     profitPercent,

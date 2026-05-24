@@ -1,18 +1,17 @@
 import { useGetAdminStats, useGetTradeSettings, useSetTradeSetting, getGetTradeSettingsQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Activity, TrendingDown, TrendingUp, Zap } from "lucide-react";
+import { Users, Activity, TrendingDown, TrendingUp, Zap, Settings } from "lucide-react";
 import { Link } from "wouter";
 import { formatPKR } from "@/lib/currency";
+import { symbolToDisplay } from "@/lib/symbols";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
 const OUTCOME_OPTIONS = [
-  { value: "auto", label: "AUTO", color: "" },
-  { value: "win",  label: "WIN",  color: "emerald" },
-  { value: "loss", label: "LOSS", color: "red" },
+  { value: "auto", label: "AUTO" },
+  { value: "win",  label: "WIN"  },
+  { value: "loss", label: "LOSS" },
 ] as const;
-
-const PKR_SYMBOLS = new Set(["BTCPKR", "BNBPKR"]);
 
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useGetAdminStats();
@@ -106,10 +105,7 @@ export default function AdminDashboard() {
               {(tradeSettings ?? []).map((s) => (
                 <div key={s.symbol} className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="font-mono text-sm font-bold">{s.symbol}</span>
-                    {PKR_SYMBOLS.has(s.symbol) && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-800/50 text-emerald-300 font-semibold">PKR</span>
-                    )}
+                    <span className="font-mono text-sm font-bold">{symbolToDisplay(s.symbol)}</span>
                   </div>
                   <div className="flex gap-1">
                     {OUTCOME_OPTIONS.map((opt) => {
@@ -170,6 +166,18 @@ export default function AdminDashboard() {
             <CardContent className="p-4 flex items-center gap-3">
               <Activity className="w-5 h-5 text-muted-foreground" />
               <div className="font-bold">All Trades</div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/admin/settings" className="block">
+          <Card className="hover:bg-accent/5 transition-colors cursor-pointer border-primary/20">
+            <CardContent className="p-4 flex items-center gap-3">
+              <Settings className="w-5 h-5 text-primary" />
+              <div>
+                <div className="font-bold text-primary">Platform Settings</div>
+                <div className="text-xs text-muted-foreground">Currency, profit %, trade limits, pairs</div>
+              </div>
             </CardContent>
           </Card>
         </Link>

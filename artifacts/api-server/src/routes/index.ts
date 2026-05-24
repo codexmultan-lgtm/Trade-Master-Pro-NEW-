@@ -6,6 +6,7 @@ import tradesRouter from "./trades.js";
 import marketsRouter from "./markets.js";
 import notificationsRouter from "./notifications.js";
 import adminRouter from "./admin.js";
+import settingsRouter from "./settings.js";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use("/trades", tradesRouter);
 router.use("/markets", marketsRouter);
 router.use("/notifications", notificationsRouter);
 router.use("/admin", adminRouter);
+router.use("/settings", settingsRouter);
 
 export default router;

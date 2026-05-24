@@ -178,12 +178,15 @@ export type TradeInputSymbol = typeof TradeInputSymbol[keyof typeof TradeInputSy
 
 export const TradeInputSymbol = {
   BTCUSDT: 'BTCUSDT',
+  BTCPKR: 'BTCPKR',
   BTCINR: 'BTCINR',
   ETHUSDT: 'ETHUSDT',
+  ETHPKR: 'ETHPKR',
   ETHINR: 'ETHINR',
   BNBUSDT: 'BNBUSDT',
-  BTCPKR: 'BTCPKR',
   BNBPKR: 'BNBPKR',
+  USDTPKR: 'USDTPKR',
+  USDTINR: 'USDTINR',
 } as const;
 
 export type TradeInputDirection = typeof TradeInputDirection[keyof typeof TradeInputDirection];
@@ -445,6 +448,52 @@ export const TradeSettingInputOutcome = {
 export interface TradeSettingInput {
   symbol: string;
   outcome: TradeSettingInputOutcome;
+}
+
+export type PlatformSettingsCurrency = typeof PlatformSettingsCurrency[keyof typeof PlatformSettingsCurrency];
+
+
+export const PlatformSettingsCurrency = {
+  PKR: 'PKR',
+  USD: 'USD',
+  INR: 'INR',
+  GBP: 'GBP',
+} as const;
+
+export interface PlatformSettings {
+  currency: PlatformSettingsCurrency;
+  currencySymbol: string;
+  profit60s: number;
+  profit120s: number;
+  profit180s: number;
+  profit240s: number;
+  lossPercent: number;
+  minTradeAmount: number;
+  maxTradeAmount: number;
+  enabledSymbols: string[];
+}
+
+export type PlatformSettingsInputCurrency = typeof PlatformSettingsInputCurrency[keyof typeof PlatformSettingsInputCurrency];
+
+
+export const PlatformSettingsInputCurrency = {
+  PKR: 'PKR',
+  USD: 'USD',
+  INR: 'INR',
+  GBP: 'GBP',
+} as const;
+
+export interface PlatformSettingsInput {
+  currency?: PlatformSettingsInputCurrency;
+  currencySymbol?: string;
+  profit60s?: number;
+  profit120s?: number;
+  profit180s?: number;
+  profit240s?: number;
+  lossPercent?: number;
+  minTradeAmount?: number;
+  maxTradeAmount?: number;
+  enabledSymbols?: string[];
 }
 
 export type GetTransactionsParams = {
