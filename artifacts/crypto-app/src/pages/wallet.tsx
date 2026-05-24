@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useGetWallet, useRequestDeposit, useRequestWithdrawal, useGetTransactions, getGetWalletQueryKey, getGetTransactionsQueryKey } from "@workspace/api-client-react";
+import { formatAmount } from "@/lib/currency";
+import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
-import { formatPKR } from "@/lib/currency";
 
 const PAYMENT_METHODS = [
   { value: "easypaisa",     label: "EasyPaisa" },
@@ -27,6 +28,7 @@ function getMethodLabel(v: string) {
 }
 
 export default function Wallet() {
+  const { currencySymbol, currency } = usePlatformSettings();
   const { data: wallet, isLoading: walletLoading } = useGetWallet();
   const { data: txData, isLoading: txLoading } = useGetTransactions({ limit: 50 });
 
@@ -40,6 +42,8 @@ export default function Wallet() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const fmt = (n: number) => formatAmount(n, currencySymbol);
 
   const deposit = useRequestDeposit({
     mutation: {
@@ -92,16 +96,16 @@ export default function Wallet() {
         <CardContent className="p-6">
           <div className="text-sm font-medium text-muted-foreground mb-1">Available Balance</div>
           <div className="text-4xl font-bold text-emerald-400">
-            {walletLoading ? "..." : formatPKR(wallet?.balance ?? 0)}
+            {walletLoading ? "..." : fmt(wallet?.balance ?? 0)}
           </div>
           <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-border">
             <div>
               <div className="text-xs text-muted-foreground">Total Deposited</div>
-              <div className="font-semibold">{formatPKR(wallet?.totalDeposited ?? 0)}</div>
+              <div className="font-semibold">{fmt(wallet?.totalDeposited ?? 0)}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground">Total Withdrawn</div>
-              <div className="font-semibold">{formatPKR(wallet?.totalWithdrawn ?? 0)}</div>
+              <div className="font-semibold">{fmt(wallet?.totalWithdrawn ?? 0)}</div>
             </div>
           </div>
         </CardContent>
@@ -118,12 +122,12 @@ export default function Wallet() {
           <Card>
             <CardHeader>
               <CardTitle>Deposit Funds</CardTitle>
-              <CardDescription>Add PKR to your account via Pakistani payment methods</CardDescription>
+              <CardDescription>Add {currency} to your account via payment methods</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleDeposit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Amount (₨ PKR)</Label>
+                  <Label>Amount ({currencySymbol} {currency})</Label>
                   <Input type="number" placeholder="5000" value={depAmount}
                     onChange={e => setDepAmount(e.target.value)} required min="1" />
                 </div>
@@ -160,12 +164,12 @@ export default function Wallet() {
           <Card>
             <CardHeader>
               <CardTitle>Withdraw Funds</CardTitle>
-              <CardDescription>Withdraw PKR to your payment account</CardDescription>
+              <CardDescription>Withdraw {currency} to your payment account</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleWithdraw} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Amount (₨ PKR)</Label>
+                  <Label>Amount ({currencySymbol} {currency})</Label>
                   <Input type="number" placeholder="1000" value={wdAmount}
                     onChange={e => setWdAmount(e.target.value)} required min="1" />
                 </div>
@@ -221,7 +225,7 @@ export default function Wallet() {
                   <div className="text-xs text-muted-foreground">{new Date(tx.createdAt).toLocaleString()}</div>
                 </div>
                 <div className="text-right flex flex-col items-end gap-1">
-                  <div className="font-bold">{formatPKR(tx.amount)}</div>
+                  <div className="font-bold">{fmt(tx.amount)}</div>
                   <Badge
                     variant={tx.status === "approved" ? "default" : tx.status === "rejected" ? "destructive" : "secondary"}
                     className={tx.status === "approved" ? "bg-primary" : ""}

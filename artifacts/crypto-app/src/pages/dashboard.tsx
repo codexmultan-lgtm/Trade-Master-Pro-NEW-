@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useGetWallet, useGetTradeStats } from "@workspace/api-client-react";
-import { formatPKR } from "@/lib/currency";
+import { formatAmount } from "@/lib/currency";
+import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -8,8 +9,11 @@ import { ArrowUpRight, ArrowDownRight, Activity, TrendingUp, TrendingDown } from
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { data: wallet, isLoading: walletLoading } = useGetWallet({ query: { enabled: !!user } });
-  const { data: stats, isLoading: statsLoading } = useGetTradeStats({ query: { enabled: !!user } });
+  const { currencySymbol } = usePlatformSettings();
+  const { data: wallet, isLoading: walletLoading } = useGetWallet({ query: { enabled: !!user, queryKey: ['wallet'] as const } });
+  const { data: stats, isLoading: statsLoading } = useGetTradeStats({ query: { enabled: !!user, queryKey: ['trade-stats'] as const } });
+
+  const fmt = (n: number) => formatAmount(n, currencySymbol);
 
   if (walletLoading || statsLoading) {
     return <div className="p-4 flex justify-center mt-10">Loading dashboard...</div>;
@@ -22,7 +26,7 @@ export default function Dashboard() {
         <Card className="bg-card border-border">
           <CardContent className="p-6">
             <div className="text-sm font-medium text-muted-foreground mb-1">Total Balance</div>
-            <div className="text-3xl font-bold text-emerald-400">{formatPKR(wallet?.balance ?? 0)}</div>
+            <div className="text-3xl font-bold text-emerald-400">{fmt(wallet?.balance ?? 0)}</div>
             
             <div className="flex gap-4 mt-6">
               <Link href="/wallet" className="flex-1">
@@ -72,7 +76,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className={`text-2xl font-bold ${stats && stats.netPnl >= 0 ? 'text-primary' : 'text-destructive'}`}>
-                {stats && stats.netPnl >= 0 ? '+' : ''}{formatPKR(stats?.netPnl ?? 0)}
+                {stats && stats.netPnl >= 0 ? '+' : ''}{fmt(stats?.netPnl ?? 0)}
               </div>
             </CardContent>
           </Card>
@@ -110,7 +114,7 @@ export default function Dashboard() {
                     tx.type === 'withdrawal' || tx.type === 'trade_loss' ? 'text-destructive' : 
                     'text-foreground'
                   }`}>
-                    {tx.type === 'deposit' || tx.type === 'trade_win' ? '+' : '-'}{formatPKR(tx.amount)}
+                    {tx.type === 'deposit' || tx.type === 'trade_win' ? '+' : '-'}{fmt(tx.amount)}
                   </div>
                   <div className="text-[10px] uppercase text-muted-foreground">{tx.status}</div>
                 </div>

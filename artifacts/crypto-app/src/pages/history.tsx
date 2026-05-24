@@ -3,11 +3,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
-import { formatPKR } from "@/lib/currency";
+import { formatAmount } from "@/lib/currency";
 import { symbolToDisplay } from "@/lib/symbols";
+import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
 
 export default function History() {
+  const { currencySymbol } = usePlatformSettings();
   const { data: historyData, isLoading } = useGetTradeHistory({ limit: 50 });
+
+  const fmt = (n: number) => formatAmount(n, currencySymbol);
 
   if (isLoading) {
     return <div className="p-4 text-center mt-10">Loading history...</div>;
@@ -44,7 +48,7 @@ export default function History() {
                 <div className="grid grid-cols-3 gap-2 text-sm mt-4 p-3 bg-secondary/50 rounded-lg">
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Amount</div>
-                    <div className="font-medium">{formatPKR(trade.amount)}</div>
+                    <div className="font-medium">{fmt(trade.amount)}</div>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Entry</div>
@@ -53,7 +57,7 @@ export default function History() {
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">P&L</div>
                     <div className={`font-bold ${trade.profitLoss && trade.profitLoss > 0 ? 'text-primary' : trade.profitLoss && trade.profitLoss < 0 ? 'text-destructive' : ''}`}>
-                      {trade.profitLoss ? (trade.profitLoss > 0 ? '+' : '') + formatPKR(trade.profitLoss) : '—'}
+                      {trade.profitLoss ? (trade.profitLoss > 0 ? '+' : '') + fmt(trade.profitLoss) : '—'}
                     </div>
                   </div>
                 </div>
