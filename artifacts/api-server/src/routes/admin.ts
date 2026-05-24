@@ -270,7 +270,9 @@ router.patch("/transactions/:id/approve", async (req: AuthRequest, res: Response
     return;
   }
 
+  const adminNotes: string | undefined = req.body?.adminNotes?.trim() || undefined;
   tx.status = "approved";
+  if (adminNotes) tx.notes = adminNotes;
   await tx.save();
 
   const user = await User.findById(tx.userId);
@@ -284,11 +286,14 @@ router.patch("/transactions/:id/approve", async (req: AuthRequest, res: Response
     }
     await user.save();
 
+    const settings = await getOrCreateSettings();
+    const sym = settings.currencySymbol;
+    const notesSuffix = adminNotes ? ` Note: ${adminNotes}` : "";
     await Notification.create({
       userId: user._id,
       type: tx.type === "deposit" ? "deposit_status" : "withdrawal_status",
       title: `${tx.type === "deposit" ? "Deposit" : "Withdrawal"} Approved`,
-      message: `Your ${tx.type} of $${tx.amount.toFixed(2)} has been approved.`,
+      message: `Your ${tx.type} of ${sym}${tx.amount.toFixed(2)} has been approved.${notesSuffix}`,
       data: { transactionId: tx._id, amount: tx.amount },
     });
   }
@@ -306,16 +311,18 @@ router.patch("/transactions/:id/reject", async (req: AuthRequest, res: Response)
   }
 
   tx.status = "rejected";
-  tx.rejectionReason = req.body?.reason ?? "Rejected by admin";
+  tx.rejectionReason = req.body?.reason?.trim() || "Rejected by admin";
   await tx.save();
 
   const user = await User.findById(tx.userId);
   if (user) {
+    const settings = await getOrCreateSettings();
+    const sym = settings.currencySymbol;
     await Notification.create({
       userId: user._id,
       type: tx.type === "deposit" ? "deposit_status" : "withdrawal_status",
       title: `${tx.type === "deposit" ? "Deposit" : "Withdrawal"} Rejected`,
-      message: `Your ${tx.type} of $${tx.amount.toFixed(2)} was rejected. Reason: ${tx.rejectionReason}`,
+      message: `Your ${tx.type} of ${sym}${tx.amount.toFixed(2)} was rejected. Reason: ${tx.rejectionReason}`,
       data: { transactionId: tx._id },
     });
   }

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
+import { CheckCircle, XCircle, Info } from "lucide-react";
 
 const PAYMENT_METHODS = [
   { value: "easypaisa",     label: "EasyPaisa" },
@@ -218,21 +219,72 @@ export default function Wallet() {
         ) : txData?.transactions.length ? (
           <div className="space-y-3">
             {txData.transactions.map((tx) => (
-              <Card key={tx.id} className="p-4 flex items-center justify-between">
-                <div>
-                  <div className="font-medium capitalize">{tx.type.replace(/_/g, " ")}</div>
-                  {tx.method && <div className="text-xs text-primary/80">{getMethodLabel(tx.method)}</div>}
-                  <div className="text-xs text-muted-foreground">{new Date(tx.createdAt).toLocaleString()}</div>
-                </div>
-                <div className="text-right flex flex-col items-end gap-1">
-                  <div className="font-bold">{fmt(tx.amount)}</div>
-                  <Badge
-                    variant={tx.status === "approved" ? "default" : tx.status === "rejected" ? "destructive" : "secondary"}
-                    className={tx.status === "approved" ? "bg-primary" : ""}
-                  >
-                    {tx.status}
-                  </Badge>
-                </div>
+              <Card
+                key={tx.id}
+                className={`overflow-hidden ${
+                  tx.status === "rejected"
+                    ? "border-destructive/40"
+                    : tx.status === "approved"
+                    ? "border-primary/30"
+                    : "border-border"
+                }`}
+              >
+                {/* Status colour bar */}
+                <div className={`h-1 w-full ${
+                  tx.status === "approved" ? "bg-primary" :
+                  tx.status === "rejected" ? "bg-destructive" : "bg-muted"
+                }`} />
+                <CardContent className="p-4 space-y-3">
+                  {/* Main row */}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="font-medium capitalize">{tx.type.replace(/_/g, " ")}</div>
+                      {tx.method && (
+                        <div className="text-xs text-primary/80">{getMethodLabel(tx.method)}</div>
+                      )}
+                      <div className="text-xs text-muted-foreground">{new Date(tx.createdAt).toLocaleString()}</div>
+                    </div>
+                    <div className="text-right flex flex-col items-end gap-1">
+                      <div className="font-bold text-base">{fmt(tx.amount)}</div>
+                      <Badge
+                        variant={tx.status === "approved" ? "default" : tx.status === "rejected" ? "destructive" : "secondary"}
+                        className={tx.status === "approved" ? "bg-primary" : ""}
+                      >
+                        {tx.status}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Admin note on approved transactions */}
+                  {tx.status === "approved" && tx.notes && (
+                    <div className="flex items-start gap-2 bg-primary/10 border border-primary/20 rounded-lg p-3">
+                      <CheckCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <div className="text-xs font-semibold text-primary mb-0.5">Admin Note</div>
+                        <div className="text-sm">{tx.notes}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Rejection reason — most important, show prominently */}
+                  {tx.status === "rejected" && tx.rejectionReason && (
+                    <div className="flex items-start gap-2 bg-destructive/10 border border-destructive/30 rounded-lg p-3">
+                      <XCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                      <div>
+                        <div className="text-xs font-semibold text-destructive mb-0.5">Reason for Rejection</div>
+                        <div className="text-sm">{tx.rejectionReason}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pending info hint */}
+                  {tx.status === "pending" && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Info className="w-3.5 h-3.5 shrink-0" />
+                      Under review — admin will process your request shortly.
+                    </div>
+                  )}
+                </CardContent>
               </Card>
             ))}
           </div>

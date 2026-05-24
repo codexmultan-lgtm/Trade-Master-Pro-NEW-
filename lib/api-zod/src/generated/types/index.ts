@@ -12,6 +12,7 @@ export * from './adminUserList';
 export * from './adminUserUpdate';
 export * from './adminUserUpdateRole';
 export * from './adminUserUpdateStatus';
+export * from './approvalInput';
 export * from './authResponse';
 export * from './balanceAdjustment';
 export * from './balanceAdjustmentType';

@@ -674,6 +674,10 @@ export const ApproveTransactionParams = zod.object({
   "id": zod.coerce.string()
 })
 
+export const ApproveTransactionBody = zod.object({
+  "adminNotes": zod.string().optional()
+})
+
 export const ApproveTransactionResponse = zod.object({
   "id": zod.string(),
   "userId": zod.string(),

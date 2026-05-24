@@ -659,6 +659,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApprovalInput"
       responses:
         "200":
           description: Transaction approved
@@ -1272,6 +1278,12 @@ components:
           type: string
           enum: [credit, debit]
         reason:
+          type: string
+
+    ApprovalInput:
+      type: object
+      properties:
+        adminNotes:
           type: string
 
     RejectionInput:

@@ -418,6 +418,10 @@ export interface BalanceAdjustment {
   reason: string;
 }
 
+export interface ApprovalInput {
+  adminNotes?: string;
+}
+
 export interface RejectionInput {
   reason?: string;
 }

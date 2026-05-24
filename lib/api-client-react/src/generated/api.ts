@@ -24,6 +24,7 @@ import type {
   AdminUserDetail,
   AdminUserList,
   AdminUserUpdate,
+  ApprovalInput,
   AuthResponse,
   BalanceAdjustment,
   Candle,
@@ -2440,14 +2441,16 @@ export const getApproveTransactionUrl = (id: string,) => {
 /**
  * @summary Approve a pending deposit or withdrawal
  */
-export const approveTransaction = async (id: string, options?: RequestInit): Promise<Transaction> => {
+export const approveTransaction = async (id: string,
+    approvalInput?: ApprovalInput, options?: RequestInit): Promise<Transaction> => {
 
   return customFetch<Transaction>(getApproveTransactionUrl(id),
   {
     ...options,
-    method: 'PATCH'
-
-
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      approvalInput,)
   }
 );}
 
@@ -2455,8 +2458,8 @@ export const approveTransaction = async (id: string, options?: RequestInit): Pro
 
 
 export const getApproveTransactionMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveTransaction>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof approveTransaction>>, TError,{id: string}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveTransaction>>, TError,{id: string;data?: BodyType<ApprovalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approveTransaction>>, TError,{id: string;data?: BodyType<ApprovalInput>}, TContext> => {
 
 const mutationKey = ['approveTransaction'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -2468,10 +2471,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveTransaction>>, {id: string}> = (props) => {
-          const {id} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveTransaction>>, {id: string;data?: BodyType<ApprovalInput>}> = (props) => {
+          const {id,data} = props ?? {};
 
-          return  approveTransaction(id,requestOptions)
+          return  approveTransaction(id,data,requestOptions)
         }
 
 
@@ -2482,18 +2485,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type ApproveTransactionMutationResult = NonNullable<Awaited<ReturnType<typeof approveTransaction>>>
-
+    export type ApproveTransactionMutationBody = BodyType<ApprovalInput> | undefined
     export type ApproveTransactionMutationError = ErrorType<unknown>
 
     /**
  * @summary Approve a pending deposit or withdrawal
  */
 export const useApproveTransaction = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveTransaction>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveTransaction>>, TError,{id: string;data?: BodyType<ApprovalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof approveTransaction>>,
         TError,
-        {id: string},
+        {id: string;data?: BodyType<ApprovalInput>},
         TContext
       > => {
       return useMutation(getApproveTransactionMutationOptions(options));
