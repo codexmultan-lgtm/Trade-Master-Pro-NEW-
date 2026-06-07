@@ -33,7 +33,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mkdir -p /tmp/mongodb-data && rm -f /tmp/mongodb-data/WiredTiger.lock && mongod --dbpath /tmp/mongodb-data --port 27017 --bind_ip 127.0.0.1 --logpath /tmp/mongodb.log --fork && sleep 3 && PORT=8080 pnpm --filter @workspace/api-server run dev"
+args = "PORT=8080 pnpm --filter @workspace/api-server run dev"
 waitForPort = 8080
 
 [[workflows.workflow]]
@@ -74,4 +74,3 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
-MONGODB_URI = "mongodb://localhost:27017/cryptotrade"
