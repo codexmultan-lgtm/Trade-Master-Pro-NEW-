@@ -238,6 +238,22 @@ router.post("/users/:id/wallet/reset", async (req: AuthRequest, res: Response) =
   res.json(formatUser(user));
 });
 
+// ─── CHANGE USER PASSWORD ─────────────────────────────────────
+router.patch("/users/:id/password", async (req: AuthRequest, res: Response) => {
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 6) {
+    res.status(400).json({ error: "newPassword must be at least 6 characters" });
+    return;
+  }
+  const user = await User.findById(req.params.id).select("+password");
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+  user.password = newPassword;
+  await user.save();
+
+  res.json({ success: true, message: "Password updated successfully" });
+});
+
 // ─── WITHDRAWAL BAN ───────────────────────────────────────────
 router.patch("/users/:id/withdrawal-ban", async (req: AuthRequest, res: Response) => {
   const { banned, reason } = req.body;

@@ -11,7 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
-import { ArrowLeft, ArrowUp, ArrowDown, Ban, ShieldOff } from "lucide-react";
+import { ArrowLeft, ArrowUp, ArrowDown, Ban, ShieldOff, KeyRound } from "lucide-react";
 import { Link } from "wouter";
 
 const API_BASE = import.meta.env.VITE_API_URL as string;
@@ -43,6 +43,10 @@ export default function AdminUserDetail() {
   const [adjustReason, setAdjustReason] = useState("");
   const [resetReason, setResetReason] = useState("");
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  const [newPassword, setNewPassword] = useState("");
+  const [showChangePw, setShowChangePw] = useState(false);
+  const [changePwLoading, setChangePwLoading] = useState(false);
 
   const [wdBanReason, setWdBanReason] = useState("");
   const [showWdBan, setShowWdBan] = useState(false);
@@ -105,6 +109,22 @@ export default function AdminUserDetail() {
       data: { amount: Number(adjustAmount), type: adjustType, reason: adjustReason }
     });
   };
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (newPassword.length < 6) return;
+    setChangePwLoading(true);
+    try {
+      await patchUserBan(id as string, "password", { newPassword });
+      toast({ title: "Password updated successfully" });
+      setNewPassword("");
+      setShowChangePw(false);
+    } catch (err: any) {
+      toast({ title: "Failed", description: err.message, variant: "destructive" });
+    } finally {
+      setChangePwLoading(false);
+    }
+  }
 
   async function handleWithdrawalBan(ban: boolean) {
     if (ban && !wdBanReason.trim()) return;
@@ -198,6 +218,54 @@ export default function AdminUserDetail() {
               {user.status === 'active' ? 'Freeze User' : 'Unfreeze User'}
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Change Password */}
+      <Card>
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <KeyRound className="w-4 h-4 text-primary" />
+            Change Password
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-2">
+          {!showChangePw ? (
+            <Button className="w-full bg-primary hover:bg-primary/90" onClick={() => setShowChangePw(true)}>
+              Set New Password
+            </Button>
+          ) : (
+            <form onSubmit={handleChangePassword} className="space-y-3">
+              <div className="space-y-1">
+                <Label className="text-xs">New Password (min 6 characters)</Label>
+                <Input
+                  type="password"
+                  placeholder="Enter new password"
+                  value={newPassword}
+                  onChange={e => setNewPassword(e.target.value)}
+                  minLength={6}
+                  required
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => { setShowChangePw(false); setNewPassword(""); }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                  disabled={newPassword.length < 6 || changePwLoading}
+                >
+                  {changePwLoading ? "Updating..." : "Update Password"}
+                </Button>
+              </div>
+            </form>
+          )}
         </CardContent>
       </Card>
 
