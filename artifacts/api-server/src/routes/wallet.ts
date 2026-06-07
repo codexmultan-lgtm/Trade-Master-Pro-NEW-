@@ -73,7 +73,16 @@ router.post("/withdraw", checkFrozen, async (req: AuthRequest, res: Response) =>
     return;
   }
   const user = await User.findById(req.userId);
-  if (!user || user.balance < amount) {
+  if (!user) {
+    res.status(404).json({ error: "User not found" });
+    return;
+  }
+  if (user.withdrawalBanned) {
+    const reason = user.withdrawalBanReason || "Contact support for details.";
+    res.status(403).json({ error: `Withdrawals are suspended on your account. Reason: ${reason}` });
+    return;
+  }
+  if (user.balance < amount) {
     res.status(400).json({ error: "Insufficient balance" });
     return;
   }

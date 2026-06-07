@@ -9,6 +9,8 @@ export const SYMBOL_DISPLAY: Record<string, string> = {
   BNBPKR:   "BNB/PKR",
   USDTPKR:  "USDT/PKR",
   USDTINR:  "USDT/INR",
+  BTSPKR:   "BTS/PKR",
+  BTSINR:   "BTS/INR",
 };
 
 export function symbolToDisplay(symbol: string): string {

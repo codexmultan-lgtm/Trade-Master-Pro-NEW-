@@ -26,6 +26,10 @@ function formatUser(user: InstanceType<typeof User>) {
     totalLoss: user.totalLoss,
     createdAt: user.createdAt,
     lastLoginAt: user.lastLoginAt ?? null,
+    withdrawalBanned: user.withdrawalBanned ?? false,
+    withdrawalBanReason: user.withdrawalBanReason ?? null,
+    tradeBanned: user.tradeBanned ?? false,
+    tradeBanReason: user.tradeBanReason ?? null,
   };
 }
 
@@ -229,6 +233,68 @@ router.post("/users/:id/wallet/reset", async (req: AuthRequest, res: Response) =
     title: "Wallet Reset",
     message: `Your wallet has been reset to $0.00 by admin. Reason: ${reason}`,
     data: { type: "reset", reason },
+  });
+
+  res.json(formatUser(user));
+});
+
+// ─── WITHDRAWAL BAN ───────────────────────────────────────────
+router.patch("/users/:id/withdrawal-ban", async (req: AuthRequest, res: Response) => {
+  const { banned, reason } = req.body;
+  if (typeof banned !== "boolean") {
+    res.status(400).json({ error: "banned (boolean) is required" });
+    return;
+  }
+  if (banned && !reason?.trim()) {
+    res.status(400).json({ error: "reason is required when banning withdrawal" });
+    return;
+  }
+  const user = await User.findById(req.params.id);
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+  user.withdrawalBanned = banned;
+  user.withdrawalBanReason = banned ? reason.trim() : undefined;
+  await user.save();
+
+  await Notification.create({
+    userId: user._id,
+    type: "balance_adjustment",
+    title: banned ? "Withdrawal Suspended" : "Withdrawal Restored",
+    message: banned
+      ? `Your withdrawal access has been suspended. Reason: ${reason.trim()}`
+      : "Your withdrawal access has been restored by admin.",
+    data: { banned, reason: reason?.trim() ?? null },
+  });
+
+  res.json(formatUser(user));
+});
+
+// ─── TRADE BAN ────────────────────────────────────────────────
+router.patch("/users/:id/trade-ban", async (req: AuthRequest, res: Response) => {
+  const { banned, reason } = req.body;
+  if (typeof banned !== "boolean") {
+    res.status(400).json({ error: "banned (boolean) is required" });
+    return;
+  }
+  if (banned && !reason?.trim()) {
+    res.status(400).json({ error: "reason is required when banning trade" });
+    return;
+  }
+  const user = await User.findById(req.params.id);
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+  user.tradeBanned = banned;
+  user.tradeBanReason = banned ? reason.trim() : undefined;
+  await user.save();
+
+  await Notification.create({
+    userId: user._id,
+    type: "balance_adjustment",
+    title: banned ? "Trading Suspended" : "Trading Restored",
+    message: banned
+      ? `Your trading access has been suspended. Reason: ${reason.trim()}`
+      : "Your trading access has been restored by admin.",
+    data: { banned, reason: reason?.trim() ?? null },
   });
 
   res.json(formatUser(user));
@@ -456,6 +522,7 @@ const ALL_SYMBOLS = [
   "ETHUSDT","ETHPKR","ETHINR",
   "BNBUSDT","BNBPKR",
   "USDTPKR","USDTINR",
+  "BTSPKR","BTSINR",
 ];
 
 router.get("/trade-settings", async (_req: AuthRequest, res: Response) => {

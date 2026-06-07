@@ -16,6 +16,10 @@ export interface IUser extends Document {
   lastLoginAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  withdrawalBanned: boolean;
+  withdrawalBanReason?: string;
+  tradeBanned: boolean;
+  tradeBanReason?: string;
   comparePassword(candidate: string): Promise<boolean>;
 }
 
@@ -33,6 +37,10 @@ const UserSchema = new Schema<IUser>(
     totalProfit: { type: Number, default: 0 },
     totalLoss: { type: Number, default: 0 },
     lastLoginAt: { type: Date },
+    withdrawalBanned: { type: Boolean, default: false },
+    withdrawalBanReason: { type: String },
+    tradeBanned: { type: Boolean, default: false },
+    tradeBanReason: { type: String },
   },
   { timestamps: true }
 );

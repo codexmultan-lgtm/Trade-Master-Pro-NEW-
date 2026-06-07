@@ -66,6 +66,11 @@ router.post("/", checkFrozen, async (req: AuthRequest, res: Response) => {
 
   const user = await User.findById(req.userId);
   if (!user) { res.status(404).json({ error: "User not found" }); return; }
+  if (user.tradeBanned) {
+    const reason = user.tradeBanReason || "Contact support for details.";
+    res.status(403).json({ error: `Trading is suspended on your account. Reason: ${reason}` });
+    return;
+  }
   if (user.balance < amount) {
     res.status(400).json({ error: "Insufficient balance" });
     return;

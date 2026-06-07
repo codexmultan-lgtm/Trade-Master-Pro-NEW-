@@ -26,7 +26,7 @@ const PlatformSettingsSchema = new Schema<IPlatformSettings>(
     maxTradeAmount:   { type: Number, default: 100000 },
     enabledSymbols:   {
       type: [String],
-      default: ["BTCUSDT","BTCPKR","BTCINR","ETHUSDT","ETHPKR","ETHINR","BNBUSDT","BNBPKR","USDTPKR","USDTINR"],
+      default: ["BTCUSDT","BTCPKR","BTCINR","ETHUSDT","ETHPKR","ETHINR","BNBUSDT","BNBPKR","USDTPKR","USDTINR","BTSPKR","BTSINR"],
     },
   },
   { timestamps: true }
