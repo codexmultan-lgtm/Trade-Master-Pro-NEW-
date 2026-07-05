@@ -14,11 +14,11 @@ import { format } from "date-fns";
 import { ArrowLeft, ArrowUp, ArrowDown, Ban, ShieldOff, KeyRound } from "lucide-react";
 import { Link } from "wouter";
 
-const API_BASE = import.meta.env.VITE_API_URL as string;
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
 
 async function patchUserBan(id: string, path: string, body: object): Promise<void> {
   const token = localStorage.getItem("crypto_token");
-  const res = await fetch(`${API_BASE}/admin/users/${id}/${path}`, {
+  const res = await fetch(`${API_BASE}/api/admin/users/${id}/${path}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
