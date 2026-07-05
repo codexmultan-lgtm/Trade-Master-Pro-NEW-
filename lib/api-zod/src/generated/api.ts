@@ -56,7 +56,12 @@ export const LoginResponse = zod.object({
   "totalProfit": zod.number().optional(),
   "totalLoss": zod.number().optional(),
   "createdAt": zod.coerce.date(),
-  "lastLoginAt": zod.coerce.date().nullish()
+  "lastLoginAt": zod.coerce.date().nullish(),
+  "withdrawalBanned": zod.boolean().optional(),
+  "withdrawalBanReason": zod.string().nullish(),
+  "tradeBanned": zod.boolean().optional(),
+  "tradeBanReason": zod.string().nullish(),
+  "frozenReason": zod.string().nullish()
 })
 })
 
@@ -77,7 +82,12 @@ export const GetMeResponse = zod.object({
   "totalProfit": zod.number().optional(),
   "totalLoss": zod.number().optional(),
   "createdAt": zod.coerce.date(),
-  "lastLoginAt": zod.coerce.date().nullish()
+  "lastLoginAt": zod.coerce.date().nullish(),
+  "withdrawalBanned": zod.boolean().optional(),
+  "withdrawalBanReason": zod.string().nullish(),
+  "tradeBanned": zod.boolean().optional(),
+  "tradeBanReason": zod.string().nullish(),
+  "frozenReason": zod.string().nullish()
 })
 
 
@@ -449,7 +459,12 @@ export const GetAdminUsersResponse = zod.object({
   "totalProfit": zod.number().optional(),
   "totalLoss": zod.number().optional(),
   "createdAt": zod.coerce.date(),
-  "lastLoginAt": zod.coerce.date().nullish()
+  "lastLoginAt": zod.coerce.date().nullish(),
+  "withdrawalBanned": zod.boolean().optional(),
+  "withdrawalBanReason": zod.string().nullish(),
+  "tradeBanned": zod.boolean().optional(),
+  "tradeBanReason": zod.string().nullish(),
+  "frozenReason": zod.string().nullish()
 })),
   "total": zod.number(),
   "page": zod.number(),
@@ -478,7 +493,12 @@ export const GetAdminUserResponse = zod.object({
   "totalProfit": zod.number().optional(),
   "totalLoss": zod.number().optional(),
   "createdAt": zod.coerce.date(),
-  "lastLoginAt": zod.coerce.date().nullish()
+  "lastLoginAt": zod.coerce.date().nullish(),
+  "withdrawalBanned": zod.boolean().optional(),
+  "withdrawalBanReason": zod.string().nullish(),
+  "tradeBanned": zod.boolean().optional(),
+  "tradeBanReason": zod.string().nullish(),
+  "frozenReason": zod.string().nullish()
 }),
   "recentTrades": zod.array(zod.object({
   "id": zod.string(),
@@ -526,6 +546,7 @@ export const UpdateAdminUserParams = zod.object({
 
 export const UpdateAdminUserBody = zod.object({
   "status": zod.enum(['active', 'frozen', 'banned']).optional(),
+  "reason": zod.string().optional(),
   "role": zod.enum(['user', 'admin']).optional(),
   "name": zod.string().optional(),
   "phone": zod.string().optional()
@@ -544,7 +565,12 @@ export const UpdateAdminUserResponse = zod.object({
   "totalProfit": zod.number().optional(),
   "totalLoss": zod.number().optional(),
   "createdAt": zod.coerce.date(),
-  "lastLoginAt": zod.coerce.date().nullish()
+  "lastLoginAt": zod.coerce.date().nullish(),
+  "withdrawalBanned": zod.boolean().optional(),
+  "withdrawalBanReason": zod.string().nullish(),
+  "tradeBanned": zod.boolean().optional(),
+  "tradeBanReason": zod.string().nullish(),
+  "frozenReason": zod.string().nullish()
 })
 
 
@@ -574,7 +600,12 @@ export const AdjustUserBalanceResponse = zod.object({
   "totalProfit": zod.number().optional(),
   "totalLoss": zod.number().optional(),
   "createdAt": zod.coerce.date(),
-  "lastLoginAt": zod.coerce.date().nullish()
+  "lastLoginAt": zod.coerce.date().nullish(),
+  "withdrawalBanned": zod.boolean().optional(),
+  "withdrawalBanReason": zod.string().nullish(),
+  "tradeBanned": zod.boolean().optional(),
+  "tradeBanReason": zod.string().nullish(),
+  "frozenReason": zod.string().nullish()
 })
 
 
@@ -602,7 +633,12 @@ export const ResetUserWalletResponse = zod.object({
   "totalProfit": zod.number().optional(),
   "totalLoss": zod.number().optional(),
   "createdAt": zod.coerce.date(),
-  "lastLoginAt": zod.coerce.date().nullish()
+  "lastLoginAt": zod.coerce.date().nullish(),
+  "withdrawalBanned": zod.boolean().optional(),
+  "withdrawalBanReason": zod.string().nullish(),
+  "tradeBanned": zod.boolean().optional(),
+  "tradeBanReason": zod.string().nullish(),
+  "frozenReason": zod.string().nullish()
 })
 
 

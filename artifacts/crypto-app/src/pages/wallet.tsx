@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useGetWallet, useRequestDeposit, useRequestWithdrawal, useGetTransactions, getGetWalletQueryKey, getGetTransactionsQueryKey } from "@workspace/api-client-react";
 import { formatAmount } from "@/lib/currency";
 import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, XCircle, Info } from "lucide-react";
+import { CheckCircle, XCircle, Info, Ban } from "lucide-react";
 
 const PAYMENT_METHODS = [
   { value: "easypaisa",     label: "EasyPaisa" },
@@ -30,6 +31,7 @@ function getMethodLabel(v: string) {
 
 export default function Wallet() {
   const { currencySymbol, currency } = usePlatformSettings();
+  const { user } = useAuth();
   const { data: wallet, isLoading: walletLoading } = useGetWallet();
   const { data: txData, isLoading: txLoading } = useGetTransactions({ limit: 50 });
 
@@ -162,12 +164,23 @@ export default function Wallet() {
         </TabsContent>
 
         <TabsContent value="withdraw">
-          <Card>
+          <Card className={user?.withdrawalBanned ? "border-destructive/50" : ""}>
             <CardHeader>
               <CardTitle>Withdraw Funds</CardTitle>
               <CardDescription>Withdraw {currency} to your payment account</CardDescription>
             </CardHeader>
             <CardContent>
+              {user?.withdrawalBanned ? (
+                <div className="flex items-start gap-3 bg-destructive/10 border border-destructive/30 rounded-lg p-4">
+                  <Ban className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-semibold text-destructive mb-1">Withdrawals Disabled</div>
+                    <div className="text-sm text-muted-foreground">
+                      {user.withdrawalBanReason || "Withdrawals have been disabled for your account by an admin."}
+                    </div>
+                  </div>
+                </div>
+              ) : (
               <form onSubmit={handleWithdraw} className="space-y-4">
                 <div className="space-y-2">
                   <Label>Amount ({currencySymbol} {currency})</Label>
@@ -206,6 +219,7 @@ export default function Wallet() {
                   {withdraw.isPending ? "Submitting..." : "Submit Withdrawal Request"}
                 </Button>
               </form>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

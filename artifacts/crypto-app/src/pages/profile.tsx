@@ -47,9 +47,24 @@ export default function Profile() {
           <div>
             <h2 className="text-xl font-bold">{user.name}</h2>
             <div className="text-sm text-muted-foreground">{user.email}</div>
-            <div className="text-xs uppercase mt-1 px-2 py-0.5 bg-secondary text-secondary-foreground rounded inline-block">
+            <div className={`text-xs uppercase mt-1 px-2 py-0.5 rounded inline-block ${
+              user.status === "active" ? "bg-secondary text-secondary-foreground" : "bg-destructive/20 text-destructive"
+            }`}>
               {user.status}
             </div>
+            {user.status !== "active" && user.frozenReason && (
+              <div className="text-xs text-destructive mt-1">Reason: {user.frozenReason}</div>
+            )}
+            {user.withdrawalBanned && (
+              <div className="text-xs text-destructive mt-1">
+                Withdrawals disabled{user.withdrawalBanReason ? ` — ${user.withdrawalBanReason}` : ""}
+              </div>
+            )}
+            {user.tradeBanned && (
+              <div className="text-xs text-destructive mt-1">
+                Trading disabled{user.tradeBanReason ? ` — ${user.tradeBanReason}` : ""}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

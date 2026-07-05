@@ -20,6 +20,7 @@ export interface IUser extends Document {
   withdrawalBanReason?: string;
   tradeBanned: boolean;
   tradeBanReason?: string;
+  frozenReason?: string;
   comparePassword(candidate: string): Promise<boolean>;
 }
 
@@ -41,6 +42,7 @@ const UserSchema = new Schema<IUser>(
     withdrawalBanReason: { type: String },
     tradeBanned: { type: Boolean, default: false },
     tradeBanReason: { type: String },
+    frozenReason: { type: String },
   },
   { timestamps: true }
 );

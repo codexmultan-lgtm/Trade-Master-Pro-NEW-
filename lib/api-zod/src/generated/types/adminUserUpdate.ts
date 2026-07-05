@@ -10,6 +10,7 @@ import type { AdminUserUpdateStatus } from './adminUserUpdateStatus';
 
 export interface AdminUserUpdate {
   status?: AdminUserUpdateStatus;
+  reason?: string;
   role?: AdminUserUpdateRole;
   name?: string;
   phone?: string;

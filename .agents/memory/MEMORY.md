@@ -1,0 +1,2 @@
+- [Bash reserved variable names](bash-reserved-vars.md) — never use `UID` as a shell var in test scripts, it silently resolves to the OS uid.
+- [Orval query hook queryKey requirement](orval-query-key-typecheck.md) — custom react-query options on generated hooks need explicit `queryKey` or typecheck fails.

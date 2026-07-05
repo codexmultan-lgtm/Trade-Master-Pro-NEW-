@@ -30,6 +30,7 @@ function formatUser(user: InstanceType<typeof User>) {
     withdrawalBanReason: user.withdrawalBanReason ?? null,
     tradeBanned: user.tradeBanned ?? false,
     tradeBanReason: user.tradeBanReason ?? null,
+    frozenReason: user.frozenReason ?? null,
   };
 }
 
@@ -162,14 +163,34 @@ router.get("/users/:id", async (req: AuthRequest, res: Response) => {
 });
 
 router.patch("/users/:id", async (req: AuthRequest, res: Response) => {
-  const { status, role, name, phone } = req.body;
+  const { status, role, name, phone, reason } = req.body;
+  if (status && status !== "active" && !reason?.trim()) {
+    res.status(400).json({ error: "reason is required when freezing or banning a user" });
+    return;
+  }
   const allowed: Record<string, unknown> = {};
-  if (status) allowed.status = status;
+  if (status) {
+    allowed.status = status;
+    allowed.frozenReason = status !== "active" ? reason.trim() : undefined;
+  }
   if (role) allowed.role = role;
   if (name) allowed.name = name;
   if (phone) allowed.phone = phone;
   const user = await User.findByIdAndUpdate(req.params.id, allowed, { new: true });
   if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+  if (status) {
+    await Notification.create({
+      userId: user._id,
+      type: "system",
+      title: status === "active" ? "Account Restored" : "Account Suspended",
+      message: status === "active"
+        ? "Your account access has been restored by admin."
+        : `Your account has been ${status}. Reason: ${reason.trim()}`,
+      data: { status, reason: reason?.trim() ?? null },
+    });
+  }
+
   res.json(formatUser(user));
 });
 

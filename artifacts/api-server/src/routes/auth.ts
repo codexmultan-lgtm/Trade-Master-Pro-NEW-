@@ -20,6 +20,11 @@ function formatUser(user: InstanceType<typeof User>) {
     totalLoss: user.totalLoss,
     createdAt: user.createdAt,
     lastLoginAt: user.lastLoginAt ?? null,
+    withdrawalBanned: user.withdrawalBanned ?? false,
+    withdrawalBanReason: user.withdrawalBanReason ?? null,
+    tradeBanned: user.tradeBanned ?? false,
+    tradeBanReason: user.tradeBanReason ?? null,
+    frozenReason: user.frozenReason ?? null,
   };
 }
 
@@ -47,7 +52,8 @@ router.post("/login", async (req, res: Response) => {
     return;
   }
   if (user.status !== "active") {
-    res.status(403).json({ error: "Account is frozen or banned" });
+    const reason = user.frozenReason || "Contact support for details.";
+    res.status(403).json({ error: `Your account has been ${user.status}. Reason: ${reason}` });
     return;
   }
   user.lastLoginAt = new Date();

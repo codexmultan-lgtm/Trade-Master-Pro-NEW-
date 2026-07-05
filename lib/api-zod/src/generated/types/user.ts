@@ -24,4 +24,12 @@ export interface User {
   createdAt: Date;
   /** @nullable */
   lastLoginAt?: Date | null;
+  withdrawalBanned?: boolean;
+  /** @nullable */
+  withdrawalBanReason?: string | null;
+  tradeBanned?: boolean;
+  /** @nullable */
+  tradeBanReason?: string | null;
+  /** @nullable */
+  frozenReason?: string | null;
 }

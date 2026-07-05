@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { User } from "@workspace/api-client-react";
+import { User, useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 
 interface AuthContextType {
@@ -34,6 +34,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setIsLoading(false);
   }, []);
+
+  const { data: freshUser } = useGetMe({
+    query: {
+      queryKey: getGetMeQueryKey(),
+      enabled: !!token,
+      refetchInterval: 15000,
+      refetchOnWindowFocus: true,
+    },
+  });
+
+  useEffect(() => {
+    if (freshUser) {
+      setUser(freshUser);
+      localStorage.setItem("crypto_user", JSON.stringify(freshUser));
+    }
+  }, [freshUser]);
 
   const login = (newToken: string, newUser: User) => {
     localStorage.setItem("crypto_token", newToken);

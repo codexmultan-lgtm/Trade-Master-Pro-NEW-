@@ -4,11 +4,12 @@ import { useListCandles, useGetCurrentPrice, usePlaceTrade, useGetActiveTrades, 
 import { formatMarketPrice } from "@/lib/currency";
 import { symbolToDisplay, getQuoteAsset } from "@/lib/symbols";
 import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { CandleChart } from "@/components/CandleChart";
 import { Button } from "@/components/ui/button";
 import { useSocket } from "@/hooks/useSocket";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, Ban } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export default function TradePage() {
   const { symbol } = useParams();
+  const { user } = useAuth();
   const { currencySymbol, minTradeAmount, maxTradeAmount, profit60s, profit120s, profit180s, profit240s } = usePlatformSettings();
   const [candles, setCandles] = useState<Candle[]>([]);
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
@@ -112,6 +114,7 @@ export default function TradePage() {
   }, [symbol, subscribe, queryClient, toast]);
 
   const openTradeSheet = (direction: 'up' | 'down') => {
+    if (user?.tradeBanned) return;
     setTradeDirection(direction);
     setIsSheetOpen(true);
   };
@@ -165,20 +168,34 @@ export default function TradePage() {
         </div>
       )}
 
-      <div className="p-4 grid grid-cols-2 gap-4 bg-background border-t border-border mt-auto">
-        <Button 
-          className="h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
-          onClick={() => openTradeSheet('up')}
-        >
-          <ArrowUp className="mr-2" /> BUY UP
-        </Button>
-        <Button 
-          className="h-14 text-lg bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold"
-          onClick={() => openTradeSheet('down')}
-        >
-          <ArrowDown className="mr-2" /> BUY DOWN
-        </Button>
-      </div>
+      {user?.tradeBanned ? (
+        <div className="p-4 bg-background border-t border-border mt-auto">
+          <div className="flex items-start gap-3 bg-destructive/10 border border-destructive/30 rounded-lg p-4">
+            <Ban className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+            <div>
+              <div className="text-sm font-semibold text-destructive mb-1">Trading Disabled</div>
+              <div className="text-sm text-muted-foreground">
+                {user.tradeBanReason || "Trading has been disabled for your account by an admin."}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="p-4 grid grid-cols-2 gap-4 bg-background border-t border-border mt-auto">
+          <Button 
+            className="h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
+            onClick={() => openTradeSheet('up')}
+          >
+            <ArrowUp className="mr-2" /> BUY UP
+          </Button>
+          <Button 
+            className="h-14 text-lg bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold"
+            onClick={() => openTradeSheet('down')}
+          >
+            <ArrowDown className="mr-2" /> BUY DOWN
+          </Button>
+        </div>
+      )}
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh]">

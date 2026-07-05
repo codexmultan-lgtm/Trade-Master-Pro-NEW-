@@ -56,17 +56,31 @@ export default function AdminUserDetail() {
   const [showTradeBan, setShowTradeBan] = useState(false);
   const [tradeBanLoading, setTradeBanLoading] = useState(false);
 
+  const [freezeReason, setFreezeReason] = useState("");
+  const [showFreeze, setShowFreeze] = useState(false);
+
   const updateStatus = useUpdateAdminUser({
     mutation: {
       onSuccess: () => {
         toast({ title: "User updated" });
         queryClient.invalidateQueries({ queryKey: getGetAdminUserQueryKey(id as string) });
+        setFreezeReason("");
+        setShowFreeze(false);
       },
       onError: (err: any) => {
         toast({ title: "Failed", description: err.message, variant: "destructive" });
       }
     }
   });
+
+  function handleFreeze() {
+    if (!freezeReason.trim()) return;
+    updateStatus.mutate({ id: id as string, data: { status: "frozen", reason: freezeReason.trim() } });
+  }
+
+  function handleUnfreeze() {
+    updateStatus.mutate({ id: id as string, data: { status: "active", reason: "Restored by admin" } });
+  }
 
   const adjustBalance = useAdjustUserBalance({
     mutation: {
@@ -189,6 +203,12 @@ export default function AdminUserDetail() {
             </div>
           </div>
 
+          {user.status !== 'active' && user.frozenReason && (
+            <p className="text-xs text-destructive -mt-2 mb-2">
+              {user.status === 'frozen' ? 'Frozen' : 'Banned'} — Reason: {user.frozenReason}
+            </p>
+          )}
+
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
             <div>
               <div className="text-xs text-muted-foreground">Balance</div>
@@ -208,15 +228,50 @@ export default function AdminUserDetail() {
             </div>
           </div>
 
-          <div className="flex gap-2 mt-6">
-            <Button
-              variant={user.status === 'active' ? 'destructive' : 'default'}
-              className={`flex-1 ${user.status !== 'active' ? 'bg-primary hover:bg-primary/90' : ''}`}
-              onClick={() => updateStatus.mutate({ id: id as string, data: { status: user.status === 'active' ? 'frozen' : 'active' } })}
-              disabled={updateStatus.isPending}
-            >
-              {user.status === 'active' ? 'Freeze User' : 'Unfreeze User'}
-            </Button>
+          <div className="mt-6">
+            {user.status === 'active' ? (
+              !showFreeze ? (
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  onClick={() => setShowFreeze(true)}
+                >
+                  Freeze User
+                </Button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Reason for freezing account</Label>
+                    <Input
+                      placeholder="e.g. Suspicious activity, Policy violation..."
+                      value={freezeReason}
+                      onChange={e => setFreezeReason(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1" onClick={() => { setShowFreeze(false); setFreezeReason(""); }}>
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="flex-1"
+                      disabled={!freezeReason.trim() || updateStatus.isPending}
+                      onClick={handleFreeze}
+                    >
+                      {updateStatus.isPending ? "Freezing..." : "Confirm Freeze"}
+                    </Button>
+                  </div>
+                </div>
+              )
+            ) : (
+              <Button
+                className="w-full bg-primary hover:bg-primary/90"
+                onClick={handleUnfreeze}
+                disabled={updateStatus.isPending}
+              >
+                {updateStatus.isPending ? "Unfreezing..." : "Unfreeze User"}
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

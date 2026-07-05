@@ -893,6 +893,16 @@ components:
         lastLoginAt:
           type: ["string", "null"]
           format: date-time
+        withdrawalBanned:
+          type: boolean
+        withdrawalBanReason:
+          type: ["string", "null"]
+        tradeBanned:
+          type: boolean
+        tradeBanReason:
+          type: ["string", "null"]
+        frozenReason:
+          type: ["string", "null"]
 
     # ─── WALLET ───
     WalletSummary:
@@ -1260,6 +1270,8 @@ components:
         status:
           type: string
           enum: [active, frozen, banned]
+        reason:
+          type: string
         role:
           type: string
           enum: [user, admin]

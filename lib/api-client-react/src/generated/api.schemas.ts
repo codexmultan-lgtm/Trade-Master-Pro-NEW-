@@ -62,6 +62,14 @@ export interface User {
   createdAt: string;
   /** @nullable */
   lastLoginAt?: string | null;
+  withdrawalBanned?: boolean;
+  /** @nullable */
+  withdrawalBanReason?: string | null;
+  tradeBanned?: boolean;
+  /** @nullable */
+  tradeBanReason?: string | null;
+  /** @nullable */
+  frozenReason?: string | null;
 }
 
 export interface AuthResponse {
@@ -399,6 +407,7 @@ export const AdminUserUpdateRole = {
 
 export interface AdminUserUpdate {
   status?: AdminUserUpdateStatus;
+  reason?: string;
   role?: AdminUserUpdateRole;
   name?: string;
   phone?: string;
