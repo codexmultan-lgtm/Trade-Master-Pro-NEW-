@@ -70,6 +70,11 @@ export interface User {
   tradeBanReason?: string | null;
   /** @nullable */
   frozenReason?: string | null;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  profileHealth?: number;
 }
 
 export interface AuthResponse {
@@ -411,6 +416,11 @@ export interface AdminUserUpdate {
   role?: AdminUserUpdateRole;
   name?: string;
   phone?: string;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  profileHealth?: number;
 }
 
 export type BalanceAdjustmentType = typeof BalanceAdjustmentType[keyof typeof BalanceAdjustmentType];

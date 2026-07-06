@@ -25,6 +25,7 @@ function formatUser(user: InstanceType<typeof User>) {
     tradeBanned: user.tradeBanned ?? false,
     tradeBanReason: user.tradeBanReason ?? null,
     frozenReason: user.frozenReason ?? null,
+    profileHealth: user.profileHealth ?? 100,
   };
 }
 

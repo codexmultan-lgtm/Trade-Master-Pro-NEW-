@@ -31,6 +31,7 @@ function formatUser(user: InstanceType<typeof User>) {
     tradeBanned: user.tradeBanned ?? false,
     tradeBanReason: user.tradeBanReason ?? null,
     frozenReason: user.frozenReason ?? null,
+    profileHealth: user.profileHealth ?? 100,
   };
 }
 
@@ -163,10 +164,17 @@ router.get("/users/:id", async (req: AuthRequest, res: Response) => {
 });
 
 router.patch("/users/:id", async (req: AuthRequest, res: Response) => {
-  const { status, role, name, phone, reason } = req.body;
+  const { status, role, name, phone, reason, profileHealth } = req.body;
   if (status && status !== "active" && !reason?.trim()) {
     res.status(400).json({ error: "reason is required when freezing or banning a user" });
     return;
+  }
+  if (profileHealth !== undefined) {
+    const val = Number(profileHealth);
+    if (Number.isNaN(val) || val < 0 || val > 100) {
+      res.status(400).json({ error: "profileHealth must be a number between 0 and 100" });
+      return;
+    }
   }
   const allowed: Record<string, unknown> = {};
   if (status) {
@@ -176,6 +184,8 @@ router.patch("/users/:id", async (req: AuthRequest, res: Response) => {
   if (role) allowed.role = role;
   if (name) allowed.name = name;
   if (phone) allowed.phone = phone;
+  const previousUser = profileHealth !== undefined ? await User.findById(req.params.id) : null;
+  if (profileHealth !== undefined) allowed.profileHealth = Number(profileHealth);
   const user = await User.findByIdAndUpdate(req.params.id, allowed, { new: true });
   if (!user) { res.status(404).json({ error: "User not found" }); return; }
 
@@ -188,6 +198,16 @@ router.patch("/users/:id", async (req: AuthRequest, res: Response) => {
         ? "Your account access has been restored by admin."
         : `Your account has been ${status}. Reason: ${reason.trim()}`,
       data: { status, reason: reason?.trim() ?? null },
+    });
+  }
+
+  if (profileHealth !== undefined && previousUser && previousUser.profileHealth !== user.profileHealth) {
+    await Notification.create({
+      userId: user._id,
+      type: "system",
+      title: "Profile Health Updated",
+      message: `Your profile health score has been updated to ${user.profileHealth}%${reason?.trim() ? `. Reason: ${reason.trim()}` : "."}`,
+      data: { profileHealth: user.profileHealth, reason: reason?.trim() ?? null },
     });
   }
 

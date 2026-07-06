@@ -6,7 +6,21 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useChangePassword } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, User as UserIcon, HeartPulse, TrendingUp, ShieldCheck, AlertTriangle } from "lucide-react";
+import ProfileHealthRing from "@/components/ProfileHealthRing";
+
+function healthTips(value: number): { icon: typeof ShieldCheck; text: string }[] {
+  if (value >= 85) {
+    return [{ icon: ShieldCheck, text: "Your account is in excellent standing. Keep it up!" }];
+  }
+  if (value >= 70) {
+    return [{ icon: TrendingUp, text: "Your account is in good standing." }];
+  }
+  if (value >= 40) {
+    return [{ icon: AlertTriangle, text: "Your health score has dipped. Contact support if you have questions." }];
+  }
+  return [{ icon: AlertTriangle, text: "Your health score is low. This may affect your account privileges. Contact support." }];
+}
 
 export default function Profile() {
   const { user, logout } = useAuth();
@@ -66,6 +80,37 @@ export default function Profile() {
               </div>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card border-border overflow-hidden relative">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2">
+            <HeartPulse className="w-5 h-5 text-primary" />
+            Profile Health
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-5 pt-2 pb-6">
+          <ProfileHealthRing value={user.profileHealth ?? 100} />
+
+          <div className="w-full space-y-2">
+            {healthTips(user.profileHealth ?? 100).map((tip, i) => {
+              const Icon = tip.icon;
+              return (
+                <div
+                  key={i}
+                  className="flex items-start gap-2 bg-secondary/60 rounded-lg p-3 text-sm text-muted-foreground"
+                >
+                  <Icon className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
+                  <span>{tip.text}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="text-xs text-muted-foreground text-center">
+            Your Profile Health score reflects your account standing and is managed by our team.
+          </p>
         </CardContent>
       </Card>
 

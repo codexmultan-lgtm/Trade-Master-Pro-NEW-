@@ -32,4 +32,9 @@ export interface User {
   tradeBanReason?: string | null;
   /** @nullable */
   frozenReason?: string | null;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  profileHealth?: number;
 }

@@ -10,9 +10,24 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { format } from "date-fns";
-import { ArrowLeft, ArrowUp, ArrowDown, Ban, ShieldOff, KeyRound } from "lucide-react";
+import { ArrowLeft, ArrowUp, ArrowDown, Ban, ShieldOff, KeyRound, HeartPulse } from "lucide-react";
 import { Link } from "wouter";
+
+function healthColor(value: number) {
+  if (value >= 70) return { text: "text-emerald-400", bar: "bg-emerald-400", ring: "stroke-emerald-400" };
+  if (value >= 40) return { text: "text-amber-400", bar: "bg-amber-400", ring: "stroke-amber-400" };
+  return { text: "text-destructive", bar: "bg-destructive", ring: "stroke-destructive" };
+}
+
+function healthLabel(value: number) {
+  if (value >= 85) return "Excellent";
+  if (value >= 70) return "Good";
+  if (value >= 40) return "Fair";
+  if (value >= 20) return "Poor";
+  return "Critical";
+}
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
 
@@ -58,6 +73,24 @@ export default function AdminUserDetail() {
 
   const [freezeReason, setFreezeReason] = useState("");
   const [showFreeze, setShowFreeze] = useState(false);
+
+  const [healthValue, setHealthValue] = useState<number | null>(null);
+  const [healthReason, setHealthReason] = useState("");
+  const [healthDirty, setHealthDirty] = useState(false);
+
+  const updateHealth = useUpdateAdminUser({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: "Profile health updated" });
+        queryClient.invalidateQueries({ queryKey: getGetAdminUserQueryKey(id as string) });
+        setHealthDirty(false);
+        setHealthReason("");
+      },
+      onError: (err: any) => {
+        toast({ title: "Failed", description: err.message, variant: "destructive" });
+      }
+    }
+  });
 
   const updateStatus = useUpdateAdminUser({
     mutation: {
@@ -114,6 +147,15 @@ export default function AdminUserDetail() {
   if (!data) return <div className="p-4 text-center mt-10">User not found</div>;
 
   const { user, recentTrades, recentTransactions } = data as any;
+  const currentHealth = healthValue !== null ? healthValue : (user.profileHealth ?? 100);
+  const healthColors = healthColor(currentHealth);
+
+  function handleSaveHealth() {
+    updateHealth.mutate({
+      id: id as string,
+      data: { profileHealth: currentHealth, reason: healthReason.trim() || undefined }
+    });
+  }
 
   const handleAdjust = (e: React.FormEvent) => {
     e.preventDefault();
@@ -273,6 +315,63 @@ export default function AdminUserDetail() {
               </Button>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Profile Health */}
+      <Card>
+        <CardHeader className="p-4 pb-2">
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+            <HeartPulse className={`w-4 h-4 ${healthColors.text}`} />
+            Profile Health
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 pt-2 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className={`text-2xl font-bold ${healthColors.text}`}>{currentHealth}%</span>
+            <Badge variant="outline" className={healthColors.text}>{healthLabel(currentHealth)}</Badge>
+          </div>
+          <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all ${healthColors.bar}`}
+              style={{ width: `${currentHealth}%` }}
+            />
+          </div>
+          <Slider
+            value={[currentHealth]}
+            min={0}
+            max={100}
+            step={1}
+            onValueChange={(v) => { setHealthValue(v[0]); setHealthDirty(true); }}
+          />
+          {healthDirty && (
+            <div className="space-y-3 pt-1">
+              <div className="space-y-1">
+                <Label className="text-xs">Reason (optional, notifies user)</Label>
+                <Input
+                  placeholder="e.g. Verified identity, Incomplete KYC..."
+                  value={healthReason}
+                  onChange={e => setHealthReason(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => { setHealthValue(null); setHealthReason(""); setHealthDirty(false); }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                  disabled={updateHealth.isPending}
+                  onClick={handleSaveHealth}
+                >
+                  {updateHealth.isPending ? "Saving..." : "Save Health Score"}
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

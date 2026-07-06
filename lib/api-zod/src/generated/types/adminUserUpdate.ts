@@ -14,4 +14,9 @@ export interface AdminUserUpdate {
   role?: AdminUserUpdateRole;
   name?: string;
   phone?: string;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  profileHealth?: number;
 }

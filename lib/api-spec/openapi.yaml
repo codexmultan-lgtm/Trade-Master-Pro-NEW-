@@ -903,6 +903,10 @@ components:
           type: ["string", "null"]
         frozenReason:
           type: ["string", "null"]
+        profileHealth:
+          type: number
+          minimum: 0
+          maximum: 100
 
     # ─── WALLET ───
     WalletSummary:
@@ -1279,6 +1283,10 @@ components:
           type: string
         phone:
           type: string
+        profileHealth:
+          type: number
+          minimum: 0
+          maximum: 100
 
     BalanceAdjustment:
       type: object

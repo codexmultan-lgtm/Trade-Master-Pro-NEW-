@@ -41,6 +41,11 @@ export const LoginBody = zod.object({
   "password": zod.string()
 })
 
+export const loginResponseUserProfileHealthMin = 0;
+export const loginResponseUserProfileHealthMax = 100;
+
+
+
 export const LoginResponse = zod.object({
   "token": zod.string(),
   "user": zod.object({
@@ -61,7 +66,8 @@ export const LoginResponse = zod.object({
   "withdrawalBanReason": zod.string().nullish(),
   "tradeBanned": zod.boolean().optional(),
   "tradeBanReason": zod.string().nullish(),
-  "frozenReason": zod.string().nullish()
+  "frozenReason": zod.string().nullish(),
+  "profileHealth": zod.number().min(loginResponseUserProfileHealthMin).max(loginResponseUserProfileHealthMax).optional()
 })
 })
 
@@ -69,6 +75,11 @@ export const LoginResponse = zod.object({
 /**
  * @summary Get current authenticated user
  */
+export const getMeResponseProfileHealthMin = 0;
+export const getMeResponseProfileHealthMax = 100;
+
+
+
 export const GetMeResponse = zod.object({
   "id": zod.string(),
   "name": zod.string(),
@@ -87,7 +98,8 @@ export const GetMeResponse = zod.object({
   "withdrawalBanReason": zod.string().nullish(),
   "tradeBanned": zod.boolean().optional(),
   "tradeBanReason": zod.string().nullish(),
-  "frozenReason": zod.string().nullish()
+  "frozenReason": zod.string().nullish(),
+  "profileHealth": zod.number().min(getMeResponseProfileHealthMin).max(getMeResponseProfileHealthMax).optional()
 })
 
 
@@ -445,6 +457,11 @@ export const GetAdminUsersQueryParams = zod.object({
   "page": zod.coerce.number().default(getAdminUsersQueryPageDefault)
 })
 
+export const getAdminUsersResponseUsersItemProfileHealthMin = 0;
+export const getAdminUsersResponseUsersItemProfileHealthMax = 100;
+
+
+
 export const GetAdminUsersResponse = zod.object({
   "users": zod.array(zod.object({
   "id": zod.string(),
@@ -464,7 +481,8 @@ export const GetAdminUsersResponse = zod.object({
   "withdrawalBanReason": zod.string().nullish(),
   "tradeBanned": zod.boolean().optional(),
   "tradeBanReason": zod.string().nullish(),
-  "frozenReason": zod.string().nullish()
+  "frozenReason": zod.string().nullish(),
+  "profileHealth": zod.number().min(getAdminUsersResponseUsersItemProfileHealthMin).max(getAdminUsersResponseUsersItemProfileHealthMax).optional()
 })),
   "total": zod.number(),
   "page": zod.number(),
@@ -478,6 +496,11 @@ export const GetAdminUsersResponse = zod.object({
 export const GetAdminUserParams = zod.object({
   "id": zod.coerce.string()
 })
+
+export const getAdminUserResponseUserProfileHealthMin = 0;
+export const getAdminUserResponseUserProfileHealthMax = 100;
+
+
 
 export const GetAdminUserResponse = zod.object({
   "user": zod.object({
@@ -498,7 +521,8 @@ export const GetAdminUserResponse = zod.object({
   "withdrawalBanReason": zod.string().nullish(),
   "tradeBanned": zod.boolean().optional(),
   "tradeBanReason": zod.string().nullish(),
-  "frozenReason": zod.string().nullish()
+  "frozenReason": zod.string().nullish(),
+  "profileHealth": zod.number().min(getAdminUserResponseUserProfileHealthMin).max(getAdminUserResponseUserProfileHealthMax).optional()
 }),
   "recentTrades": zod.array(zod.object({
   "id": zod.string(),
@@ -544,13 +568,24 @@ export const UpdateAdminUserParams = zod.object({
   "id": zod.coerce.string()
 })
 
+export const updateAdminUserBodyProfileHealthMin = 0;
+export const updateAdminUserBodyProfileHealthMax = 100;
+
+
+
 export const UpdateAdminUserBody = zod.object({
   "status": zod.enum(['active', 'frozen', 'banned']).optional(),
   "reason": zod.string().optional(),
   "role": zod.enum(['user', 'admin']).optional(),
   "name": zod.string().optional(),
-  "phone": zod.string().optional()
+  "phone": zod.string().optional(),
+  "profileHealth": zod.number().min(updateAdminUserBodyProfileHealthMin).max(updateAdminUserBodyProfileHealthMax).optional()
 })
+
+export const updateAdminUserResponseProfileHealthMin = 0;
+export const updateAdminUserResponseProfileHealthMax = 100;
+
+
 
 export const UpdateAdminUserResponse = zod.object({
   "id": zod.string(),
@@ -570,7 +605,8 @@ export const UpdateAdminUserResponse = zod.object({
   "withdrawalBanReason": zod.string().nullish(),
   "tradeBanned": zod.boolean().optional(),
   "tradeBanReason": zod.string().nullish(),
-  "frozenReason": zod.string().nullish()
+  "frozenReason": zod.string().nullish(),
+  "profileHealth": zod.number().min(updateAdminUserResponseProfileHealthMin).max(updateAdminUserResponseProfileHealthMax).optional()
 })
 
 
@@ -586,6 +622,11 @@ export const AdjustUserBalanceBody = zod.object({
   "type": zod.enum(['credit', 'debit']),
   "reason": zod.string()
 })
+
+export const adjustUserBalanceResponseProfileHealthMin = 0;
+export const adjustUserBalanceResponseProfileHealthMax = 100;
+
+
 
 export const AdjustUserBalanceResponse = zod.object({
   "id": zod.string(),
@@ -605,7 +646,8 @@ export const AdjustUserBalanceResponse = zod.object({
   "withdrawalBanReason": zod.string().nullish(),
   "tradeBanned": zod.boolean().optional(),
   "tradeBanReason": zod.string().nullish(),
-  "frozenReason": zod.string().nullish()
+  "frozenReason": zod.string().nullish(),
+  "profileHealth": zod.number().min(adjustUserBalanceResponseProfileHealthMin).max(adjustUserBalanceResponseProfileHealthMax).optional()
 })
 
 
@@ -619,6 +661,11 @@ export const ResetUserWalletParams = zod.object({
 export const ResetUserWalletBody = zod.object({
   "reason": zod.string()
 })
+
+export const resetUserWalletResponseProfileHealthMin = 0;
+export const resetUserWalletResponseProfileHealthMax = 100;
+
+
 
 export const ResetUserWalletResponse = zod.object({
   "id": zod.string(),
@@ -638,7 +685,8 @@ export const ResetUserWalletResponse = zod.object({
   "withdrawalBanReason": zod.string().nullish(),
   "tradeBanned": zod.boolean().optional(),
   "tradeBanReason": zod.string().nullish(),
-  "frozenReason": zod.string().nullish()
+  "frozenReason": zod.string().nullish(),
+  "profileHealth": zod.number().min(resetUserWalletResponseProfileHealthMin).max(resetUserWalletResponseProfileHealthMax).optional()
 })
 
 
