@@ -12,26 +12,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, XCircle, Info, Ban, Wallet2, BadgeIndianRupee, CircleDollarSign, Building2, Check, ArrowRight } from "lucide-react";
 
-const PAYMENT_METHODS = [
-  { value: "easypaisa",     label: "EasyPaisa" },
-  { value: "jazzcash",      label: "JazzCash" },
-  { value: "sadapay",       label: "SadaPay" },
-  { value: "nayapay",       label: "NayaPay" },
-  { value: "bank_transfer", label: "Bank Transfer" },
-  { value: "crypto",        label: "Crypto" },
-];
 
-const MOBILE_METHODS = new Set(["easypaisa", "jazzcash", "sadapay", "nayapay"]);
-
-function getMethodLabel(v: string) {
-  return PAYMENT_METHODS.find(m => m.value === v)?.label ?? v;
-}
+const METHOD_LABELS: Record<string, string> = {
+  easypaisa: "EasyPaisa", jazzcash: "JazzCash", sadapay: "SadaPay",
+  nayapay: "NayaPay", bank_transfer: "Bank Transfer", crypto: "Crypto",
+};
+function getMethodLabel(v: string) { return METHOD_LABELS[v] ?? v; }
 
 type WdCurrency = "INR" | "PKR" | "USDT";
 
@@ -51,8 +42,6 @@ export default function Wallet() {
   });
 
   const [depAmount, setDepAmount] = useState("");
-  const [depMethod, setDepMethod] = useState("easypaisa");
-  const [depPhone, setDepPhone] = useState("");
 
   const [wdAmount, setWdAmount] = useState("");
 
@@ -98,7 +87,7 @@ export default function Wallet() {
         toast({ title: "Deposit request submitted", description: "Admin will review and credit your account." });
         queryClient.invalidateQueries({ queryKey: getGetWalletQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetTransactionsQueryKey() });
-        setDepAmount(""); setDepPhone("");
+        setDepAmount("");
       },
       onError: (err: any) => toast({ title: "Deposit failed", description: err.message, variant: "destructive" }),
     }
@@ -128,12 +117,12 @@ export default function Wallet() {
 
   const handleDeposit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!depAmount || isNaN(Number(depAmount))) return;
+    if (!depAmount || isNaN(Number(depAmount)) || !savedAccount?.currency) return;
     deposit.mutate({
       data: {
         amount: Number(depAmount),
-        method: depMethod as any,
-        notes: MOBILE_METHODS.has(depMethod) && depPhone ? `Sender: ${depPhone}` : undefined,
+        method: getAccountMethod(savedAccount) as any,
+        notes: getAccountDetails(savedAccount),
       }
     });
   };
@@ -231,40 +220,96 @@ export default function Wallet() {
           <Card>
             <CardHeader>
               <CardTitle>Deposit Funds</CardTitle>
-              <CardDescription>Add {currency} to your account via payment methods</CardDescription>
+              <CardDescription>Funds will be received from your saved account</CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleDeposit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Amount ({currencySymbol} {currency})</Label>
-                  <Input type="number" placeholder="5000" value={depAmount}
-                    onChange={e => setDepAmount(e.target.value)} required min="1" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Payment Method</Label>
-                  <Select value={depMethod} onValueChange={setDepMethod}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {PAYMENT_METHODS.map(m => (
-                        <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {MOBILE_METHODS.has(depMethod) && (
-                  <div className="space-y-2">
-                    <Label>Your {getMethodLabel(depMethod)} Number</Label>
-                    <Input type="tel" placeholder="03XX-XXXXXXX" value={depPhone}
-                      onChange={e => setDepPhone(e.target.value)} />
-                    <p className="text-xs text-muted-foreground">
-                      Send payment from your {getMethodLabel(depMethod)} and provide the number used.
-                    </p>
+            <CardContent className="space-y-4">
+              {accountLoading ? (
+                <div className="py-8 text-center text-sm text-muted-foreground">Loading account...</div>
+              ) : !isAccountSaved ? (
+                /* No account saved — prompt */
+                <div className="rounded-xl border-2 border-dashed border-border p-6 flex flex-col items-center gap-3 text-center">
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <Wallet2 className="w-6 h-6 text-muted-foreground" />
                   </div>
-                )}
-                <Button className="w-full bg-emerald-600 hover:bg-emerald-700" type="submit" disabled={deposit.isPending}>
-                  {deposit.isPending ? "Submitting..." : "Submit Deposit Request"}
-                </Button>
-              </form>
+                  <div>
+                    <div className="font-semibold text-sm">No account saved yet</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Add your account in the Account tab before requesting a deposit.
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const trigger = document.querySelector<HTMLElement>('[value="account"]');
+                      trigger?.click();
+                    }}
+                    className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                  >
+                    Go to Account tab <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                /* Account exists — show card + amount */
+                <form onSubmit={handleDeposit} className="space-y-4">
+                  {/* Saved account card */}
+                  <div>
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2 block">
+                      Sending From
+                    </Label>
+                    <div className="flex items-start gap-3 rounded-xl border-2 border-emerald-500/40 bg-emerald-500/5 p-4">
+                      <div className="mt-0.5 shrink-0">
+                        {getAccountIcon(savedAccount?.currency)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
+                            {savedAccount?.currency}
+                          </span>
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-xs text-emerald-400 font-medium">Verified</span>
+                        </div>
+                        {savedAccount?.currency === "INR" && (
+                          <div className="space-y-0.5">
+                            <div className="text-sm font-semibold">{savedAccount.accountHolder}</div>
+                            <div className="text-xs text-muted-foreground">{savedAccount.accountName}</div>
+                            <div className="text-xs font-mono text-muted-foreground">IFSC: {savedAccount.ifscNumber}</div>
+                          </div>
+                        )}
+                        {savedAccount?.currency === "PKR" && (
+                          <div className="space-y-0.5">
+                            <div className="text-sm font-semibold">{savedAccount.accountHolderName}</div>
+                            <div className="text-xs text-muted-foreground">{savedAccount.accountTitle}</div>
+                            <div className="text-xs font-mono text-muted-foreground">{savedAccount.accountNumber}</div>
+                          </div>
+                        )}
+                        {savedAccount?.currency === "USDT" && (
+                          <div className="space-y-0.5">
+                            <div className="text-sm font-semibold">Crypto Wallet</div>
+                            <div className="text-xs font-mono text-muted-foreground break-all">{savedAccount.walletAddress}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Amount */}
+                  <div className="space-y-2">
+                    <Label>Amount ({currencySymbol} {currency})</Label>
+                    <Input
+                      type="number"
+                      placeholder="5000"
+                      value={depAmount}
+                      onChange={e => setDepAmount(e.target.value)}
+                      required
+                      min="1"
+                    />
+                  </div>
+
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700" type="submit" disabled={deposit.isPending}>
+                    {deposit.isPending ? "Submitting..." : "Submit Deposit Request"}
+                  </Button>
+                </form>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
