@@ -173,6 +173,38 @@ paths:
               schema:
                 $ref: "#/components/schemas/Transaction"
 
+  /wallet/withdrawal-account:
+    get:
+      operationId: getWithdrawalAccount
+      tags: [wallet]
+      summary: Get the user's saved withdrawal account
+      responses:
+        "200":
+          description: Withdrawal account details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WithdrawalAccount"
+    patch:
+      operationId: updateWithdrawalAccount
+      tags: [wallet]
+      summary: Save or update the user's withdrawal account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawalAccountInput"
+      responses:
+        "200":
+          description: Updated withdrawal account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WithdrawalAccount"
+        "400":
+          description: Validation error
+
   /wallet/transactions:
     get:
       operationId: getTransactions
@@ -909,6 +941,49 @@ components:
           maximum: 100
 
     # ─── WALLET ───
+    WithdrawalAccount:
+      type: object
+      properties:
+        currency:
+          type: string
+          enum: [INR, PKR, USDT]
+        accountHolder:
+          type: ["string", "null"]
+        accountName:
+          type: ["string", "null"]
+        ifscNumber:
+          type: ["string", "null"]
+        accountTitle:
+          type: ["string", "null"]
+        accountNumber:
+          type: ["string", "null"]
+        accountHolderName:
+          type: ["string", "null"]
+        walletAddress:
+          type: ["string", "null"]
+
+    WithdrawalAccountInput:
+      type: object
+      required: [currency]
+      properties:
+        currency:
+          type: string
+          enum: [INR, PKR, USDT]
+        accountHolder:
+          type: string
+        accountName:
+          type: string
+        ifscNumber:
+          type: string
+        accountTitle:
+          type: string
+        accountNumber:
+          type: string
+        accountHolderName:
+          type: string
+        walletAddress:
+          type: string
+
     WalletSummary:
       type: object
       required: [balance, totalDeposited, totalWithdrawn, totalProfit, totalLoss, netPnl, pendingDeposits, pendingWithdrawals]

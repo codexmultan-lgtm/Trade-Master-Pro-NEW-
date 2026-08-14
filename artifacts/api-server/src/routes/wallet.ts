@@ -97,6 +97,57 @@ router.post("/withdraw", checkFrozen, async (req: AuthRequest, res: Response) =>
   res.status(201).json(formatTx(tx));
 });
 
+router.get("/withdrawal-account", async (req: AuthRequest, res: Response) => {
+  const user = await User.findById(req.userId);
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+  res.json(user.withdrawalAccount ?? null);
+});
+
+router.patch("/withdrawal-account", async (req: AuthRequest, res: Response) => {
+  const { currency, accountHolder, accountName, ifscNumber, accountTitle, accountNumber, accountHolderName, walletAddress } = req.body;
+  if (!currency || !["INR", "PKR", "USDT"].includes(currency)) {
+    res.status(400).json({ error: "currency must be one of: INR, PKR, USDT" });
+    return;
+  }
+
+  if (currency === "INR") {
+    if (!accountHolder || !accountName || !ifscNumber) {
+      res.status(400).json({ error: "INR account requires accountHolder, accountName, and ifscNumber" });
+      return;
+    }
+  } else if (currency === "PKR") {
+    if (!accountTitle || !accountNumber || !accountHolderName) {
+      res.status(400).json({ error: "PKR account requires accountTitle, accountNumber, and accountHolderName" });
+      return;
+    }
+  } else if (currency === "USDT") {
+    if (!walletAddress) {
+      res.status(400).json({ error: "USDT account requires walletAddress" });
+      return;
+    }
+  }
+
+  const user = await User.findById(req.userId);
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+
+  const account: typeof user.withdrawalAccount = { currency };
+  if (currency === "INR") {
+    account!.accountHolder = accountHolder;
+    account!.accountName = accountName;
+    account!.ifscNumber = ifscNumber;
+  } else if (currency === "PKR") {
+    account!.accountTitle = accountTitle;
+    account!.accountNumber = accountNumber;
+    account!.accountHolderName = accountHolderName;
+  } else {
+    account!.walletAddress = walletAddress;
+  }
+
+  user.withdrawalAccount = account;
+  await user.save();
+  res.json(user.withdrawalAccount);
+});
+
 router.get("/transactions", async (req: AuthRequest, res: Response) => {
   const { type, status, limit = "20", page = "1" } = req.query as Record<string, string>;
   const query: Record<string, unknown> = { userId: req.userId };

@@ -82,6 +82,53 @@ export interface AuthResponse {
   user: User;
 }
 
+export type WithdrawalAccountCurrency = typeof WithdrawalAccountCurrency[keyof typeof WithdrawalAccountCurrency];
+
+
+export const WithdrawalAccountCurrency = {
+  INR: 'INR',
+  PKR: 'PKR',
+  USDT: 'USDT',
+} as const;
+
+export interface WithdrawalAccount {
+  currency?: WithdrawalAccountCurrency;
+  /** @nullable */
+  accountHolder?: string | null;
+  /** @nullable */
+  accountName?: string | null;
+  /** @nullable */
+  ifscNumber?: string | null;
+  /** @nullable */
+  accountTitle?: string | null;
+  /** @nullable */
+  accountNumber?: string | null;
+  /** @nullable */
+  accountHolderName?: string | null;
+  /** @nullable */
+  walletAddress?: string | null;
+}
+
+export type WithdrawalAccountInputCurrency = typeof WithdrawalAccountInputCurrency[keyof typeof WithdrawalAccountInputCurrency];
+
+
+export const WithdrawalAccountInputCurrency = {
+  INR: 'INR',
+  PKR: 'PKR',
+  USDT: 'USDT',
+} as const;
+
+export interface WithdrawalAccountInput {
+  currency: WithdrawalAccountInputCurrency;
+  accountHolder?: string;
+  accountName?: string;
+  ifscNumber?: string;
+  accountTitle?: string;
+  accountNumber?: string;
+  accountHolderName?: string;
+  walletAddress?: string;
+}
+
 export type TransactionType = typeof TransactionType[keyof typeof TransactionType];
 
 

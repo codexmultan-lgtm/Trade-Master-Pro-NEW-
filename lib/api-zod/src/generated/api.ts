@@ -175,6 +175,47 @@ export const RequestWithdrawalBody = zod.object({
 
 
 /**
+ * @summary Get the user's saved withdrawal account
+ */
+export const GetWithdrawalAccountResponse = zod.object({
+  "currency": zod.enum(['INR', 'PKR', 'USDT']).optional(),
+  "accountHolder": zod.string().nullish(),
+  "accountName": zod.string().nullish(),
+  "ifscNumber": zod.string().nullish(),
+  "accountTitle": zod.string().nullish(),
+  "accountNumber": zod.string().nullish(),
+  "accountHolderName": zod.string().nullish(),
+  "walletAddress": zod.string().nullish()
+})
+
+
+/**
+ * @summary Save or update the user's withdrawal account
+ */
+export const UpdateWithdrawalAccountBody = zod.object({
+  "currency": zod.enum(['INR', 'PKR', 'USDT']),
+  "accountHolder": zod.string().optional(),
+  "accountName": zod.string().optional(),
+  "ifscNumber": zod.string().optional(),
+  "accountTitle": zod.string().optional(),
+  "accountNumber": zod.string().optional(),
+  "accountHolderName": zod.string().optional(),
+  "walletAddress": zod.string().optional()
+})
+
+export const UpdateWithdrawalAccountResponse = zod.object({
+  "currency": zod.enum(['INR', 'PKR', 'USDT']).optional(),
+  "accountHolder": zod.string().nullish(),
+  "accountName": zod.string().nullish(),
+  "ifscNumber": zod.string().nullish(),
+  "accountTitle": zod.string().nullish(),
+  "accountNumber": zod.string().nullish(),
+  "accountHolderName": zod.string().nullish(),
+  "walletAddress": zod.string().nullish()
+})
+
+
+/**
  * @summary Get user transaction history
  */
 export const getTransactionsQueryLimitDefault = 20;

@@ -22,6 +22,16 @@ export interface IUser extends Document {
   tradeBanReason?: string;
   frozenReason?: string;
   profileHealth: number;
+  withdrawalAccount?: {
+    currency: "INR" | "PKR" | "USDT";
+    accountHolder?: string;
+    accountName?: string;
+    ifscNumber?: string;
+    accountTitle?: string;
+    accountNumber?: string;
+    accountHolderName?: string;
+    walletAddress?: string;
+  };
   comparePassword(candidate: string): Promise<boolean>;
 }
 
@@ -45,6 +55,19 @@ const UserSchema = new Schema<IUser>(
     tradeBanReason: { type: String },
     frozenReason: { type: String },
     profileHealth: { type: Number, default: 100, min: 0, max: 100 },
+    withdrawalAccount: {
+      type: new Schema({
+        currency: { type: String, enum: ["INR", "PKR", "USDT"], required: true },
+        accountHolder: { type: String },
+        accountName: { type: String },
+        ifscNumber: { type: String },
+        accountTitle: { type: String },
+        accountNumber: { type: String },
+        accountHolderName: { type: String },
+        walletAddress: { type: String },
+      }, { _id: false }),
+      default: undefined,
+    },
   },
   { timestamps: true }
 );
