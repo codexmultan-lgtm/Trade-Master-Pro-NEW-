@@ -294,7 +294,7 @@ export default function Wallet() {
 
                   {/* Amount */}
                   <div className="space-y-2">
-                    <Label>Amount ({currencySymbol} {currency})</Label>
+                    <Label>Amount</Label>
                     <Input
                       type="number"
                       placeholder="5000"
@@ -404,7 +404,7 @@ export default function Wallet() {
 
                   {/* Amount */}
                   <div className="space-y-2">
-                    <Label>Amount ({currencySymbol} {currency})</Label>
+                    <Label>Amount</Label>
                     <Input
                       type="number"
                       placeholder="1000"
