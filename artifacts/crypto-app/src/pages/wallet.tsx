@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, XCircle, Info, Ban, Wallet2, BadgeIndianRupee, CircleDollarSign, Building2, Check } from "lucide-react";
+import { CheckCircle, XCircle, Info, Ban, Wallet2, BadgeIndianRupee, CircleDollarSign, Building2, Check, ArrowRight } from "lucide-react";
 
 const PAYMENT_METHODS = [
   { value: "easypaisa",     label: "EasyPaisa" },
@@ -55,8 +55,6 @@ export default function Wallet() {
   const [depPhone, setDepPhone] = useState("");
 
   const [wdAmount, setWdAmount] = useState("");
-  const [wdMethod, setWdMethod] = useState("easypaisa");
-  const [wdAccount, setWdAccount] = useState("");
 
   // Withdrawal account form state
   const [waCurrency, setWaCurrency] = useState<WdCurrency>("PKR");
@@ -112,7 +110,7 @@ export default function Wallet() {
         toast({ title: "Withdrawal request submitted", description: "Admin will process your withdrawal." });
         queryClient.invalidateQueries({ queryKey: getGetWalletQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetTransactionsQueryKey() });
-        setWdAmount(""); setWdAccount("");
+        setWdAmount("");
       },
       onError: (err: any) => toast({ title: "Withdrawal failed", description: err.message, variant: "destructive" }),
     }
@@ -140,10 +138,36 @@ export default function Wallet() {
     });
   };
 
+  function getAccountMethod(acc: typeof savedAccount): string {
+    if (!acc) return "bank_transfer";
+    if (acc.currency === "USDT") return "crypto";
+    return "bank_transfer";
+  }
+
+  function getAccountDetails(acc: typeof savedAccount): string {
+    if (!acc) return "";
+    if (acc.currency === "INR") return `INR | ${acc.accountHolder} | ${acc.accountName} | IFSC: ${acc.ifscNumber}`;
+    if (acc.currency === "PKR") return `PKR | ${acc.accountHolderName} | ${acc.accountTitle} | Acc: ${acc.accountNumber}`;
+    if (acc.currency === "USDT") return `USDT | ${acc.walletAddress}`;
+    return "";
+  }
+
+  function getAccountIcon(currency?: string | null) {
+    if (currency === "INR") return <BadgeIndianRupee className="w-5 h-5 text-primary" />;
+    if (currency === "USDT") return <CircleDollarSign className="w-5 h-5 text-primary" />;
+    return <Building2 className="w-5 h-5 text-primary" />;
+  }
+
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!wdAmount || isNaN(Number(wdAmount)) || !wdAccount) return;
-    withdraw.mutate({ data: { amount: Number(wdAmount), method: wdMethod as any, accountDetails: wdAccount } });
+    if (!wdAmount || isNaN(Number(wdAmount)) || !savedAccount?.currency) return;
+    withdraw.mutate({
+      data: {
+        amount: Number(wdAmount),
+        method: getAccountMethod(savedAccount) as any,
+        accountDetails: getAccountDetails(savedAccount),
+      }
+    });
   };
 
   const handleSaveAccount = (e: React.FormEvent) => {
@@ -250,9 +274,10 @@ export default function Wallet() {
           <Card className={user?.withdrawalBanned ? "border-destructive/50" : ""}>
             <CardHeader>
               <CardTitle>Withdraw Funds</CardTitle>
-              <CardDescription>Withdraw {currency} to your payment account</CardDescription>
+              <CardDescription>Funds will be sent to your saved payout account</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              {/* Banned state */}
               {user?.withdrawalBanned ? (
                 <div className="flex items-start gap-3 bg-destructive/10 border border-destructive/30 rounded-lg p-4">
                   <Ban className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
@@ -263,45 +288,95 @@ export default function Wallet() {
                     </div>
                   </div>
                 </div>
+              ) : accountLoading ? (
+                <div className="py-8 text-center text-sm text-muted-foreground">Loading account...</div>
+              ) : !isAccountSaved ? (
+                /* No account saved — prompt to add one */
+                <div className="rounded-xl border-2 border-dashed border-border p-6 flex flex-col items-center gap-3 text-center">
+                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                    <Wallet2 className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-sm">No payout account saved</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Add your withdrawal account in the Account tab before requesting a withdrawal.
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const trigger = document.querySelector<HTMLElement>('[data-state][value="account"]');
+                      trigger?.click();
+                    }}
+                    className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                  >
+                    Go to Account tab <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               ) : (
-              <form onSubmit={handleWithdraw} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Amount ({currencySymbol} {currency})</Label>
-                  <Input type="number" placeholder="1000" value={wdAmount}
-                    onChange={e => setWdAmount(e.target.value)} required min="1" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Withdrawal Method</Label>
-                  <Select value={wdMethod} onValueChange={setWdMethod}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {PAYMENT_METHODS.map(m => (
-                        <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>
-                    {MOBILE_METHODS.has(wdMethod)
-                      ? `${getMethodLabel(wdMethod)} Account / Phone Number`
-                      : wdMethod === "crypto" ? "Wallet Address" : "Bank Account / IBAN"}
-                  </Label>
-                  <Input
-                    placeholder={
-                      MOBILE_METHODS.has(wdMethod) ? "03XX-XXXXXXX"
-                      : wdMethod === "crypto" ? "Your wallet address"
-                      : "PK00XXXX0000000000000000"
-                    }
-                    value={wdAccount}
-                    onChange={e => setWdAccount(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button className="w-full" type="submit" disabled={withdraw.isPending}>
-                  {withdraw.isPending ? "Submitting..." : "Submit Withdrawal Request"}
-                </Button>
-              </form>
+                /* Account exists — show it and amount form */
+                <form onSubmit={handleWithdraw} className="space-y-4">
+                  {/* Saved account card */}
+                  <div>
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2 block">
+                      Payout Account
+                    </Label>
+                    <div className="flex items-start gap-3 rounded-xl border-2 border-primary/40 bg-primary/5 p-4">
+                      <div className="mt-0.5 shrink-0">
+                        {getAccountIcon(savedAccount?.currency)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary">
+                            {savedAccount?.currency}
+                          </span>
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-xs text-emerald-400 font-medium">Verified</span>
+                        </div>
+                        {savedAccount?.currency === "INR" && (
+                          <div className="space-y-0.5">
+                            <div className="text-sm font-semibold">{savedAccount.accountHolder}</div>
+                            <div className="text-xs text-muted-foreground">{savedAccount.accountName}</div>
+                            <div className="text-xs font-mono text-muted-foreground">IFSC: {savedAccount.ifscNumber}</div>
+                          </div>
+                        )}
+                        {savedAccount?.currency === "PKR" && (
+                          <div className="space-y-0.5">
+                            <div className="text-sm font-semibold">{savedAccount.accountHolderName}</div>
+                            <div className="text-xs text-muted-foreground">{savedAccount.accountTitle}</div>
+                            <div className="text-xs font-mono text-muted-foreground">{savedAccount.accountNumber}</div>
+                          </div>
+                        )}
+                        {savedAccount?.currency === "USDT" && (
+                          <div className="space-y-0.5">
+                            <div className="text-sm font-semibold">Crypto Wallet</div>
+                            <div className="text-xs font-mono text-muted-foreground break-all">{savedAccount.walletAddress}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Amount */}
+                  <div className="space-y-2">
+                    <Label>Amount ({currencySymbol} {currency})</Label>
+                    <Input
+                      type="number"
+                      placeholder="1000"
+                      value={wdAmount}
+                      onChange={e => setWdAmount(e.target.value)}
+                      required
+                      min="1"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Available: <span className="font-semibold text-foreground">{fmt(wallet?.balance ?? 0)}</span>
+                    </p>
+                  </div>
+
+                  <Button className="w-full" type="submit" disabled={withdraw.isPending}>
+                    {withdraw.isPending ? "Submitting..." : "Submit Withdrawal Request"}
+                  </Button>
+                </form>
               )}
             </CardContent>
           </Card>
