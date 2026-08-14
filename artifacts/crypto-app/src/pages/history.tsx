@@ -3,15 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
-import { formatAmount } from "@/lib/currency";
 import { symbolToDisplay } from "@/lib/symbols";
-import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
 
 export default function History() {
-  const { currencySymbol } = usePlatformSettings();
   const { data: historyData, isLoading } = useGetTradeHistory({ limit: 50 });
 
-  const fmt = (n: number) => formatAmount(n, currencySymbol);
+  const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   if (isLoading) {
     return <div className="p-4 text-center mt-10">Loading history...</div>;

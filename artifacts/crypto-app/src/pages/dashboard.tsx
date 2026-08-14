@@ -1,7 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useGetWallet, useGetTradeStats } from "@workspace/api-client-react";
-import { formatAmount } from "@/lib/currency";
-import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -9,11 +7,10 @@ import { ArrowUpRight, ArrowDownRight, Activity, TrendingUp, TrendingDown } from
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { currencySymbol } = usePlatformSettings();
   const { data: wallet, isLoading: walletLoading } = useGetWallet({ query: { enabled: !!user, queryKey: ['wallet'] as const } });
   const { data: stats, isLoading: statsLoading } = useGetTradeStats({ query: { enabled: !!user, queryKey: ['trade-stats'] as const } });
 
-  const fmt = (n: number) => formatAmount(n, currencySymbol);
+  const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   if (walletLoading || statsLoading) {
     return <div className="p-4 flex justify-center mt-10">Loading dashboard...</div>;

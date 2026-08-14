@@ -4,7 +4,6 @@ import {
   useGetWithdrawalAccount, useUpdateWithdrawalAccount,
   getGetWalletQueryKey, getGetTransactionsQueryKey, getGetWithdrawalAccountQueryKey,
 } from "@workspace/api-client-react";
-import { formatAmount } from "@/lib/currency";
 import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -33,7 +32,7 @@ const CURRENCY_OPTIONS: { value: WdCurrency; label: string; icon: React.ReactNod
 ];
 
 export default function Wallet() {
-  const { currencySymbol, currency } = usePlatformSettings();
+  const { currency } = usePlatformSettings();
   const { user } = useAuth();
   const { data: wallet, isLoading: walletLoading } = useGetWallet();
   const { data: txData, isLoading: txLoading } = useGetTransactions({ limit: 50 });
@@ -79,7 +78,7 @@ export default function Wallet() {
     }
   }, [savedAccount]);
 
-  const fmt = (n: number) => formatAmount(n, currencySymbol);
+  const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const deposit = useRequestDeposit({
     mutation: {

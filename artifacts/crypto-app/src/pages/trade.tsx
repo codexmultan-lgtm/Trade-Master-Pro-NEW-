@@ -18,7 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function TradePage() {
   const { symbol } = useParams();
   const { user } = useAuth();
-  const { currencySymbol, minTradeAmount, maxTradeAmount, profit60s, profit120s, profit180s, profit240s } = usePlatformSettings();
+  const { minTradeAmount, maxTradeAmount, profit60s, profit120s, profit180s, profit240s } = usePlatformSettings();
   const [candles, setCandles] = useState<Candle[]>([]);
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -101,7 +101,7 @@ export default function TradePage() {
       const pl = data.profitLoss as number;
       toast({
         title: `Trade ${data.result.toUpperCase()}`,
-        description: `Trade settled. P&L: ${currencySymbol}${Math.abs(pl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        description: `Trade settled. P&L: ${Math.abs(pl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         variant: pl > 0 ? "default" : "destructive"
       });
     });
@@ -157,7 +157,7 @@ export default function TradePage() {
               <div className="flex justify-between items-center mb-1">
                 <span className={`flex items-center text-xs font-bold ${trade.direction === 'up' ? 'text-primary' : 'text-destructive'}`}>
                   {trade.direction === 'up' ? <ArrowUp className="w-3 h-3 mr-1" /> : <ArrowDown className="w-3 h-3 mr-1" />}
-                  {currencySymbol}{trade.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {trade.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   Entry: {formatMarketPrice(trade.entryPrice, getQuoteAsset(symbol ?? "BTCUSDT"))}
@@ -228,7 +228,7 @@ export default function TradePage() {
                     className="flex-1 text-xs"
                     onClick={() => setAmount(val)}
                   >
-                    {currencySymbol}{Number(val).toLocaleString()}
+                    {Number(val).toLocaleString()}
                   </Button>
                 ))}
               </div>
@@ -241,7 +241,7 @@ export default function TradePage() {
                 className="text-center text-lg font-bold h-12"
               />
               <p className="text-xs text-muted-foreground text-center">
-                Min: {currencySymbol}{minTradeAmount.toLocaleString()} — Max: {currencySymbol}{maxTradeAmount.toLocaleString()}
+                Min: {minTradeAmount.toLocaleString()} — Max: {maxTradeAmount.toLocaleString()}
               </p>
             </div>
 
