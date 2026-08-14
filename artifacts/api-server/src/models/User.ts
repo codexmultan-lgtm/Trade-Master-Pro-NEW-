@@ -58,8 +58,10 @@ const UserSchema = new Schema<IUser>(
     withdrawalAccount: {
       type: new Schema({
         currency: { type: String, enum: ["INR", "PKR", "USDT"], required: true },
+        accountType: { type: String, enum: ["wallet", "bank"] },
         accountHolder: { type: String },
         accountName: { type: String },
+        bankName: { type: String },
         ifscNumber: { type: String },
         accountTitle: { type: String },
         accountNumber: { type: String },

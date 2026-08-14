@@ -104,15 +104,27 @@ router.get("/withdrawal-account", async (req: AuthRequest, res: Response) => {
 });
 
 router.patch("/withdrawal-account", async (req: AuthRequest, res: Response) => {
-  const { currency, accountHolder, accountName, ifscNumber, accountTitle, accountNumber, accountHolderName, walletAddress } = req.body;
+  const { currency, accountType, accountHolder, accountName, bankName, ifscNumber, accountTitle, accountNumber, accountHolderName, walletAddress } = req.body;
   if (!currency || !["INR", "PKR", "USDT"].includes(currency)) {
     res.status(400).json({ error: "currency must be one of: INR, PKR, USDT" });
     return;
   }
 
   if (currency === "INR") {
-    if (!accountHolder || !accountName || !ifscNumber) {
-      res.status(400).json({ error: "INR account requires accountHolder, accountName, and ifscNumber" });
+    if (!accountType || !["wallet", "bank"].includes(accountType)) {
+      res.status(400).json({ error: "INR account requires accountType: wallet or bank" });
+      return;
+    }
+    if (!accountHolder || !accountNumber) {
+      res.status(400).json({ error: "INR account requires accountHolder and accountNumber" });
+      return;
+    }
+    if (accountType === "wallet" && !accountName) {
+      res.status(400).json({ error: "INR wallet account requires accountName (e.g. UPI)" });
+      return;
+    }
+    if (accountType === "bank" && (!bankName || !ifscNumber)) {
+      res.status(400).json({ error: "INR bank account requires bankName and ifscNumber" });
       return;
     }
   } else if (currency === "PKR") {
@@ -132,9 +144,15 @@ router.patch("/withdrawal-account", async (req: AuthRequest, res: Response) => {
 
   const account: typeof user.withdrawalAccount = { currency };
   if (currency === "INR") {
+    account!.accountType = accountType;
     account!.accountHolder = accountHolder;
-    account!.accountName = accountName;
-    account!.ifscNumber = ifscNumber;
+    account!.accountNumber = accountNumber;
+    if (accountType === "wallet") {
+      account!.accountName = accountName;
+    } else {
+      account!.bankName = bankName;
+      account!.ifscNumber = ifscNumber;
+    }
   } else if (currency === "PKR") {
     account!.accountTitle = accountTitle;
     account!.accountNumber = accountNumber;

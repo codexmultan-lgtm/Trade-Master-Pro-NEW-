@@ -91,12 +91,27 @@ export const WithdrawalAccountCurrency = {
   USDT: 'USDT',
 } as const;
 
+/**
+ * @nullable
+ */
+export type WithdrawalAccountAccountType = typeof WithdrawalAccountAccountType[keyof typeof WithdrawalAccountAccountType] | null;
+
+
+export const WithdrawalAccountAccountType = {
+  wallet: 'wallet',
+  bank: 'bank',
+} as const;
+
 export interface WithdrawalAccount {
   currency?: WithdrawalAccountCurrency;
+  /** @nullable */
+  accountType?: WithdrawalAccountAccountType;
   /** @nullable */
   accountHolder?: string | null;
   /** @nullable */
   accountName?: string | null;
+  /** @nullable */
+  bankName?: string | null;
   /** @nullable */
   ifscNumber?: string | null;
   /** @nullable */
@@ -118,10 +133,20 @@ export const WithdrawalAccountInputCurrency = {
   USDT: 'USDT',
 } as const;
 
+export type WithdrawalAccountInputAccountType = typeof WithdrawalAccountInputAccountType[keyof typeof WithdrawalAccountInputAccountType];
+
+
+export const WithdrawalAccountInputAccountType = {
+  wallet: 'wallet',
+  bank: 'bank',
+} as const;
+
 export interface WithdrawalAccountInput {
   currency: WithdrawalAccountInputCurrency;
+  accountType?: WithdrawalAccountInputAccountType;
   accountHolder?: string;
   accountName?: string;
+  bankName?: string;
   ifscNumber?: string;
   accountTitle?: string;
   accountNumber?: string;

@@ -47,8 +47,11 @@ export default function Wallet() {
   // Withdrawal account form state
   const [waCurrency, setWaCurrency] = useState<WdCurrency>("PKR");
   // INR fields
+  const [inrAccountType, setInrAccountType] = useState<"wallet" | "bank">("wallet");
   const [inrHolder, setInrHolder] = useState("");
-  const [inrName, setInrName] = useState("");
+  const [inrWalletName, setInrWalletName] = useState("");  // wallet name e.g. UPI
+  const [inrAccountNumber, setInrAccountNumber] = useState("");
+  const [inrBankName, setInrBankName] = useState("");
   const [inrIFSC, setInrIFSC] = useState("");
   // PKR fields
   const [pkrTitle, setPkrTitle] = useState("");
@@ -66,8 +69,12 @@ export default function Wallet() {
     const c = savedAccount.currency as WdCurrency;
     setWaCurrency(c);
     if (c === "INR") {
+      const t = (savedAccount.accountType as "wallet" | "bank") ?? "wallet";
+      setInrAccountType(t);
       setInrHolder(savedAccount.accountHolder ?? "");
-      setInrName(savedAccount.accountName ?? "");
+      setInrAccountNumber(savedAccount.accountNumber ?? "");
+      setInrWalletName(savedAccount.accountName ?? "");
+      setInrBankName(savedAccount.bankName ?? "");
       setInrIFSC(savedAccount.ifscNumber ?? "");
     } else if (c === "PKR") {
       setPkrTitle(savedAccount.accountTitle ?? "");
@@ -134,7 +141,10 @@ export default function Wallet() {
 
   function getAccountDetails(acc: typeof savedAccount): string {
     if (!acc) return "";
-    if (acc.currency === "INR") return `INR | ${acc.accountHolder} | ${acc.accountName} | IFSC: ${acc.ifscNumber}`;
+    if (acc.currency === "INR") {
+      if (acc.accountType === "bank") return `INR Bank | ${acc.accountHolder} | ${acc.bankName} | Acc: ${acc.accountNumber} | IFSC: ${acc.ifscNumber}`;
+      return `INR Wallet | ${acc.accountHolder} | ${acc.accountName} | Acc: ${acc.accountNumber}`;
+    }
     if (acc.currency === "PKR") return `PKR | ${acc.accountHolderName} | ${acc.accountTitle} | Acc: ${acc.accountNumber}`;
     if (acc.currency === "USDT") return `USDT | ${acc.walletAddress}`;
     return "";
@@ -162,9 +172,15 @@ export default function Wallet() {
     e.preventDefault();
     const payload: any = { currency: waCurrency };
     if (waCurrency === "INR") {
+      payload.accountType = inrAccountType;
       payload.accountHolder = inrHolder;
-      payload.accountName = inrName;
-      payload.ifscNumber = inrIFSC;
+      payload.accountNumber = inrAccountNumber;
+      if (inrAccountType === "wallet") {
+        payload.accountName = inrWalletName;
+      } else {
+        payload.bankName = inrBankName;
+        payload.ifscNumber = inrIFSC;
+      }
     } else if (waCurrency === "PKR") {
       payload.accountTitle = pkrTitle;
       payload.accountNumber = pkrNumber;
@@ -270,8 +286,13 @@ export default function Wallet() {
                         {savedAccount?.currency === "INR" && (
                           <div className="space-y-0.5">
                             <div className="text-sm font-semibold">{savedAccount.accountHolder}</div>
-                            <div className="text-xs text-muted-foreground">{savedAccount.accountName}</div>
-                            <div className="text-xs font-mono text-muted-foreground">IFSC: {savedAccount.ifscNumber}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {savedAccount.accountType === "bank" ? savedAccount.bankName : savedAccount.accountName}
+                              {" · "}Acc: {savedAccount.accountNumber}
+                            </div>
+                            {savedAccount.accountType === "bank" && savedAccount.ifscNumber && (
+                              <div className="text-xs font-mono text-muted-foreground">IFSC: {savedAccount.ifscNumber}</div>
+                            )}
                           </div>
                         )}
                         {savedAccount?.currency === "PKR" && (
@@ -380,8 +401,13 @@ export default function Wallet() {
                         {savedAccount?.currency === "INR" && (
                           <div className="space-y-0.5">
                             <div className="text-sm font-semibold">{savedAccount.accountHolder}</div>
-                            <div className="text-xs text-muted-foreground">{savedAccount.accountName}</div>
-                            <div className="text-xs font-mono text-muted-foreground">IFSC: {savedAccount.ifscNumber}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {savedAccount.accountType === "bank" ? savedAccount.bankName : savedAccount.accountName}
+                              {" · "}Acc: {savedAccount.accountNumber}
+                            </div>
+                            {savedAccount.accountType === "bank" && savedAccount.ifscNumber && (
+                              <div className="text-xs font-mono text-muted-foreground">IFSC: {savedAccount.ifscNumber}</div>
+                            )}
                           </div>
                         )}
                         {savedAccount?.currency === "PKR" && (
@@ -482,38 +508,96 @@ export default function Wallet() {
                     <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
                       <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                         <BadgeIndianRupee className="w-4 h-4 text-primary" />
-                        Indian Bank Account Details
+                        Indian Account Details
                       </div>
+
+                      {/* Account Type selector */}
+                      <div className="space-y-2">
+                        <Label>Account Type</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {([
+                            { value: "wallet", label: "Wallet" },
+                            { value: "bank",   label: "Bank Account" },
+                          ] as const).map(opt => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => setInrAccountType(opt.value)}
+                              className={`py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
+                                inrAccountType === opt.value
+                                  ? "border-primary bg-primary/15 text-primary"
+                                  : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Account Holder — shared */}
                       <div className="space-y-2">
                         <Label>Account Holder</Label>
                         <Input
-                          placeholder="Full name as on bank records"
+                          placeholder="Full name"
                           value={inrHolder}
                           onChange={e => setInrHolder(e.target.value)}
                           required
                         />
                       </div>
+
+                      {/* Wallet-only: Wallet Name */}
+                      {inrAccountType === "wallet" && (
+                        <div className="space-y-2">
+                          <Label>Wallet Name</Label>
+                          <Input
+                            placeholder="e.g. UPI, PhonePe, Google Pay"
+                            value={inrWalletName}
+                            onChange={e => setInrWalletName(e.target.value)}
+                            required
+                          />
+                        </div>
+                      )}
+
+                      {/* Bank-only: Bank Name */}
+                      {inrAccountType === "bank" && (
+                        <div className="space-y-2">
+                          <Label>Bank Name</Label>
+                          <Input
+                            placeholder="e.g. State Bank of India"
+                            value={inrBankName}
+                            onChange={e => setInrBankName(e.target.value)}
+                            required
+                          />
+                        </div>
+                      )}
+
+                      {/* Account Number — shared */}
                       <div className="space-y-2">
                         <Label>Account Number</Label>
                         <Input
-                          placeholder="Bank account name / nickname"
-                          value={inrName}
-                          onChange={e => setInrName(e.target.value)}
+                          placeholder="Account / UPI ID / VPA"
+                          value={inrAccountNumber}
+                          onChange={e => setInrAccountNumber(e.target.value)}
                           required
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label>IFSC Number</Label>
-                        <Input
-                          placeholder="e.g. SBIN0001234"
-                          value={inrIFSC}
-                          onChange={e => setInrIFSC(e.target.value.toUpperCase())}
-                          required
-                          maxLength={11}
-                          className="font-mono tracking-wide"
-                        />
-                        <p className="text-xs text-muted-foreground">11-character IFSC code from your bank passbook or cheque</p>
-                      </div>
+
+                      {/* Bank-only: IFSC */}
+                      {inrAccountType === "bank" && (
+                        <div className="space-y-2">
+                          <Label>IFSC Number</Label>
+                          <Input
+                            placeholder="e.g. SBIN0001234"
+                            value={inrIFSC}
+                            onChange={e => setInrIFSC(e.target.value.toUpperCase())}
+                            required
+                            maxLength={11}
+                            className="font-mono tracking-wide"
+                          />
+                          <p className="text-xs text-muted-foreground">11-character IFSC code from your bank passbook or cheque</p>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -585,7 +669,12 @@ export default function Wallet() {
                       <div className="text-xs text-emerald-300 leading-relaxed">
                         <span className="font-semibold block mb-0.5">Currently saved ({savedAccount.currency})</span>
                         {savedAccount.currency === "INR" && (
-                          <span>{savedAccount.accountHolder} · {savedAccount.accountName} · {savedAccount.ifscNumber}</span>
+                          <span>
+                            {savedAccount.accountHolder}
+                            {" · "}{savedAccount.accountType === "bank" ? savedAccount.bankName : savedAccount.accountName}
+                            {" · "}Acc: {savedAccount.accountNumber}
+                            {savedAccount.accountType === "bank" && savedAccount.ifscNumber ? ` · IFSC: ${savedAccount.ifscNumber}` : ""}
+                          </span>
                         )}
                         {savedAccount.currency === "PKR" && (
                           <span>{savedAccount.accountHolderName} · {savedAccount.accountTitle} · {savedAccount.accountNumber}</span>

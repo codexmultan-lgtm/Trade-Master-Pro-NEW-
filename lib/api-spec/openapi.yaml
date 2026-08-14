@@ -947,9 +947,14 @@ components:
         currency:
           type: string
           enum: [INR, PKR, USDT]
+        accountType:
+          type: ["string", "null"]
+          enum: [wallet, bank, null]
         accountHolder:
           type: ["string", "null"]
         accountName:
+          type: ["string", "null"]
+        bankName:
           type: ["string", "null"]
         ifscNumber:
           type: ["string", "null"]
@@ -969,9 +974,14 @@ components:
         currency:
           type: string
           enum: [INR, PKR, USDT]
+        accountType:
+          type: string
+          enum: [wallet, bank]
         accountHolder:
           type: string
         accountName:
+          type: string
+        bankName:
           type: string
         ifscNumber:
           type: string

@@ -179,8 +179,10 @@ export const RequestWithdrawalBody = zod.object({
  */
 export const GetWithdrawalAccountResponse = zod.object({
   "currency": zod.enum(['INR', 'PKR', 'USDT']).optional(),
+  "accountType": zod.union([zod.literal('wallet'),zod.literal('bank'),zod.literal(null)]).nullish(),
   "accountHolder": zod.string().nullish(),
   "accountName": zod.string().nullish(),
+  "bankName": zod.string().nullish(),
   "ifscNumber": zod.string().nullish(),
   "accountTitle": zod.string().nullish(),
   "accountNumber": zod.string().nullish(),
@@ -194,8 +196,10 @@ export const GetWithdrawalAccountResponse = zod.object({
  */
 export const UpdateWithdrawalAccountBody = zod.object({
   "currency": zod.enum(['INR', 'PKR', 'USDT']),
+  "accountType": zod.enum(['wallet', 'bank']).optional(),
   "accountHolder": zod.string().optional(),
   "accountName": zod.string().optional(),
+  "bankName": zod.string().optional(),
   "ifscNumber": zod.string().optional(),
   "accountTitle": zod.string().optional(),
   "accountNumber": zod.string().optional(),
@@ -205,8 +209,10 @@ export const UpdateWithdrawalAccountBody = zod.object({
 
 export const UpdateWithdrawalAccountResponse = zod.object({
   "currency": zod.enum(['INR', 'PKR', 'USDT']).optional(),
+  "accountType": zod.union([zod.literal('wallet'),zod.literal('bank'),zod.literal(null)]).nullish(),
   "accountHolder": zod.string().nullish(),
   "accountName": zod.string().nullish(),
+  "bankName": zod.string().nullish(),
   "ifscNumber": zod.string().nullish(),
   "accountTitle": zod.string().nullish(),
   "accountNumber": zod.string().nullish(),

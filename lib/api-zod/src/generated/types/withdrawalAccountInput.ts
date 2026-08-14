@@ -5,12 +5,15 @@
  * CryptoTrade Platform API
  * OpenAPI spec version: 0.1.0
  */
+import type { WithdrawalAccountInputAccountType } from './withdrawalAccountInputAccountType';
 import type { WithdrawalAccountInputCurrency } from './withdrawalAccountInputCurrency';
 
 export interface WithdrawalAccountInput {
   currency: WithdrawalAccountInputCurrency;
+  accountType?: WithdrawalAccountInputAccountType;
   accountHolder?: string;
   accountName?: string;
+  bankName?: string;
   ifscNumber?: string;
   accountTitle?: string;
   accountNumber?: string;
