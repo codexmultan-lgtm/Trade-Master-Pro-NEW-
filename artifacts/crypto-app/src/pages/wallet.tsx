@@ -494,7 +494,7 @@ export default function Wallet() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Account Name</Label>
+                        <Label>Account Number</Label>
                         <Input
                           placeholder="Bank account name / nickname"
                           value={inrName}
