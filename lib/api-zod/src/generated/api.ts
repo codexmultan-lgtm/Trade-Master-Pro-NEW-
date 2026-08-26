@@ -178,7 +178,7 @@ export const RequestWithdrawalBody = zod.object({
  * @summary Get the user's saved withdrawal account
  */
 export const GetWithdrawalAccountResponse = zod.object({
-  "currency": zod.enum(['INR', 'PKR', 'USDT']).optional(),
+  "currency": zod.enum(['INR', 'PKR', 'NPR', 'PHP', 'USDT']).optional(),
   "accountType": zod.union([zod.literal('wallet'),zod.literal('bank'),zod.literal(null)]).nullish(),
   "accountHolder": zod.string().nullish(),
   "accountName": zod.string().nullish(),
@@ -195,7 +195,7 @@ export const GetWithdrawalAccountResponse = zod.object({
  * @summary Save or update the user's withdrawal account
  */
 export const UpdateWithdrawalAccountBody = zod.object({
-  "currency": zod.enum(['INR', 'PKR', 'USDT']),
+  "currency": zod.enum(['INR', 'PKR', 'NPR', 'PHP', 'USDT']),
   "accountType": zod.enum(['wallet', 'bank']).optional(),
   "accountHolder": zod.string().optional(),
   "accountName": zod.string().optional(),
@@ -208,7 +208,7 @@ export const UpdateWithdrawalAccountBody = zod.object({
 })
 
 export const UpdateWithdrawalAccountResponse = zod.object({
-  "currency": zod.enum(['INR', 'PKR', 'USDT']).optional(),
+  "currency": zod.enum(['INR', 'PKR', 'NPR', 'PHP', 'USDT']).optional(),
   "accountType": zod.union([zod.literal('wallet'),zod.literal('bank'),zod.literal(null)]).nullish(),
   "accountHolder": zod.string().nullish(),
   "accountName": zod.string().nullish(),

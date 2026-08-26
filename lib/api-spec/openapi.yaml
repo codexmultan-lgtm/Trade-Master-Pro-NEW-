@@ -946,7 +946,7 @@ components:
       properties:
         currency:
           type: string
-          enum: [INR, PKR, USDT]
+          enum: [INR, PKR, NPR, PHP, USDT]
         accountType:
           type: ["string", "null"]
           enum: [wallet, bank, null]
@@ -973,7 +973,7 @@ components:
       properties:
         currency:
           type: string
-          enum: [INR, PKR, USDT]
+          enum: [INR, PKR, NPR, PHP, USDT]
         accountType:
           type: string
           enum: [wallet, bank]

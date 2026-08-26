@@ -105,8 +105,8 @@ router.get("/withdrawal-account", async (req: AuthRequest, res: Response) => {
 
 router.patch("/withdrawal-account", async (req: AuthRequest, res: Response) => {
   const { currency, accountType, accountHolder, accountName, bankName, ifscNumber, accountTitle, accountNumber, accountHolderName, walletAddress } = req.body;
-  if (!currency || !["INR", "PKR", "USDT"].includes(currency)) {
-    res.status(400).json({ error: "currency must be one of: INR, PKR, USDT" });
+  if (!currency || !["INR", "PKR", "NPR", "PHP", "USDT"].includes(currency)) {
+    res.status(400).json({ error: "currency must be one of: INR, PKR, NPR, PHP, USDT" });
     return;
   }
 
@@ -127,9 +127,9 @@ router.patch("/withdrawal-account", async (req: AuthRequest, res: Response) => {
       res.status(400).json({ error: "INR bank account requires bankName and ifscNumber" });
       return;
     }
-  } else if (currency === "PKR") {
+  } else if (currency === "PKR" || currency === "NPR" || currency === "PHP") {
     if (!accountTitle || !accountNumber || !accountHolderName) {
-      res.status(400).json({ error: "PKR account requires accountTitle, accountNumber, and accountHolderName" });
+      res.status(400).json({ error: `${currency} account requires accountTitle, accountNumber, and accountHolderName` });
       return;
     }
   } else if (currency === "USDT") {
@@ -153,7 +153,7 @@ router.patch("/withdrawal-account", async (req: AuthRequest, res: Response) => {
       account!.bankName = bankName;
       account!.ifscNumber = ifscNumber;
     }
-  } else if (currency === "PKR") {
+  } else if (currency === "PKR" || currency === "NPR" || currency === "PHP") {
     account!.accountTitle = accountTitle;
     account!.accountNumber = accountNumber;
     account!.accountHolderName = accountHolderName;

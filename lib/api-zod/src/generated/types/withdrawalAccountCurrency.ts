@@ -12,5 +12,7 @@ export type WithdrawalAccountCurrency = typeof WithdrawalAccountCurrency[keyof t
 export const WithdrawalAccountCurrency = {
   INR: 'INR',
   PKR: 'PKR',
+  NPR: 'NPR',
+  PHP: 'PHP',
   USDT: 'USDT',
 } as const;

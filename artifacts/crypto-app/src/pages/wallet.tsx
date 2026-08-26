@@ -23,11 +23,13 @@ const METHOD_LABELS: Record<string, string> = {
 };
 function getMethodLabel(v: string) { return METHOD_LABELS[v] ?? v; }
 
-type WdCurrency = "INR" | "PKR" | "USDT";
+type WdCurrency = "INR" | "PKR" | "NPR" | "PHP" | "USDT";
 
 const CURRENCY_OPTIONS: { value: WdCurrency; label: string; icon: React.ReactNode; desc: string }[] = [
   { value: "INR", label: "INR", icon: <BadgeIndianRupee className="w-5 h-5" />, desc: "Indian Rupee" },
   { value: "PKR", label: "PKR", icon: <Building2 className="w-5 h-5" />, desc: "Pakistani Rupee" },
+  { value: "NPR", label: "NPR", icon: <Building2 className="w-5 h-5" />, desc: "Nepalese Rupee" },
+  { value: "PHP", label: "PHP", icon: <Building2 className="w-5 h-5" />, desc: "Philippine Peso" },
   { value: "USDT", label: "USDT", icon: <CircleDollarSign className="w-5 h-5" />, desc: "Tether (Crypto)" },
 ];
 
@@ -53,10 +55,10 @@ export default function Wallet() {
   const [inrAccountNumber, setInrAccountNumber] = useState("");
   const [inrBankName, setInrBankName] = useState("");
   const [inrIFSC, setInrIFSC] = useState("");
-  // PKR fields
-  const [pkrTitle, setPkrTitle] = useState("");
-  const [pkrNumber, setPkrNumber] = useState("");
-  const [pkrHolderName, setPkrHolderName] = useState("");
+  // Bank / wallet account fields shared by PKR, NPR, and PHP
+  const [localAccountTitle, setLocalAccountTitle] = useState("");
+  const [localAccountNumber, setLocalAccountNumber] = useState("");
+  const [localAccountHolderName, setLocalAccountHolderName] = useState("");
   // USDT fields
   const [usdtAddress, setUsdtAddress] = useState("");
 
@@ -76,10 +78,10 @@ export default function Wallet() {
       setInrWalletName(savedAccount.accountName ?? "");
       setInrBankName(savedAccount.bankName ?? "");
       setInrIFSC(savedAccount.ifscNumber ?? "");
-    } else if (c === "PKR") {
-      setPkrTitle(savedAccount.accountTitle ?? "");
-      setPkrNumber(savedAccount.accountNumber ?? "");
-      setPkrHolderName(savedAccount.accountHolderName ?? "");
+    } else if (c === "PKR" || c === "NPR" || c === "PHP") {
+      setLocalAccountTitle(savedAccount.accountTitle ?? "");
+      setLocalAccountNumber(savedAccount.accountNumber ?? "");
+      setLocalAccountHolderName(savedAccount.accountHolderName ?? "");
     } else if (c === "USDT") {
       setUsdtAddress(savedAccount.walletAddress ?? "");
     }
@@ -145,7 +147,9 @@ export default function Wallet() {
       if (acc.accountType === "bank") return `INR Bank | ${acc.accountHolder} | ${acc.bankName} | Acc: ${acc.accountNumber} | IFSC: ${acc.ifscNumber}`;
       return `INR Wallet | ${acc.accountHolder} | ${acc.accountName} | Acc: ${acc.accountNumber}`;
     }
-    if (acc.currency === "PKR") return `PKR | ${acc.accountHolderName} | ${acc.accountTitle} | Acc: ${acc.accountNumber}`;
+    if (acc.currency === "PKR" || acc.currency === "NPR" || acc.currency === "PHP") {
+      return `${acc.currency} | ${acc.accountHolderName} | ${acc.accountTitle} | Acc: ${acc.accountNumber}`;
+    }
     if (acc.currency === "USDT") return `USDT | ${acc.walletAddress}`;
     return "";
   }
@@ -181,10 +185,10 @@ export default function Wallet() {
         payload.bankName = inrBankName;
         payload.ifscNumber = inrIFSC;
       }
-    } else if (waCurrency === "PKR") {
-      payload.accountTitle = pkrTitle;
-      payload.accountNumber = pkrNumber;
-      payload.accountHolderName = pkrHolderName;
+    } else if (waCurrency === "PKR" || waCurrency === "NPR" || waCurrency === "PHP") {
+      payload.accountTitle = localAccountTitle;
+      payload.accountNumber = localAccountNumber;
+      payload.accountHolderName = localAccountHolderName;
     } else {
       payload.walletAddress = usdtAddress;
     }
@@ -295,7 +299,7 @@ export default function Wallet() {
                             )}
                           </div>
                         )}
-                        {savedAccount?.currency === "PKR" && (
+                        {(savedAccount?.currency === "PKR" || savedAccount?.currency === "NPR" || savedAccount?.currency === "PHP") && (
                           <div className="space-y-0.5">
                             <div className="text-sm font-semibold">{savedAccount.accountHolderName}</div>
                             <div className="text-xs text-muted-foreground">{savedAccount.accountTitle}</div>
@@ -410,7 +414,7 @@ export default function Wallet() {
                             )}
                           </div>
                         )}
-                        {savedAccount?.currency === "PKR" && (
+                        {(savedAccount?.currency === "PKR" || savedAccount?.currency === "NPR" || savedAccount?.currency === "PHP") && (
                           <div className="space-y-0.5">
                             <div className="text-sm font-semibold">{savedAccount.accountHolderName}</div>
                             <div className="text-xs text-muted-foreground">{savedAccount.accountTitle}</div>
@@ -483,7 +487,7 @@ export default function Wallet() {
                   {/* Currency Selector */}
                   <div className="space-y-2">
                     <Label className="text-sm font-semibold">Select Currency</Label>
-                    <div className="grid grid-cols-3 gap-2">
+                   <div className="grid grid-cols-3 gap-2">
                       {CURRENCY_OPTIONS.map(opt => (
                         <button
                           key={opt.value}
@@ -601,39 +605,43 @@ export default function Wallet() {
                     </div>
                   )}
 
-                  {/* ── PKR Fields ── */}
-                  {waCurrency === "PKR" && (
+                   {/* ── PKR / NPR / PHP Fields ── */}
+                   {(waCurrency === "PKR" || waCurrency === "NPR" || waCurrency === "PHP") && (
                     <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-4">
                       <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                         <Building2 className="w-4 h-4 text-primary" />
-                        Pakistani Bank / Wallet Account Details
+                         {waCurrency === "PKR"
+                           ? "Pakistani Bank / Wallet Account Details"
+                           : waCurrency === "NPR"
+                           ? "Nepalese Bank / Wallet Account Details"
+                           : "Philippine Bank / Wallet Account Details"}
                       </div>
                       <div className="space-y-2">
                         <Label>Account Title</Label>
                         <Input
-                          placeholder="e.g. EasyPaisa / HBL Bank"
-                          value={pkrTitle}
-                          onChange={e => setPkrTitle(e.target.value)}
+                           placeholder="e.g. Bank or wallet name"
+                           value={localAccountTitle}
+                           onChange={e => setLocalAccountTitle(e.target.value)}
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Account Number</Label>
+                         <Label>Account Holder Name</Label>
                         <Input
-                          placeholder="e.g. 03XX-XXXXXXX or IBAN"
-                          value={pkrNumber}
-                          onChange={e => setPkrNumber(e.target.value)}
+                           placeholder="Full name as registered"
+                           value={localAccountHolderName}
+                           onChange={e => setLocalAccountHolderName(e.target.value)}
                           required
-                          className="font-mono tracking-wide"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Account Holder Name</Label>
+                         <Label>Account Number</Label>
                         <Input
-                          placeholder="Full name as registered"
-                          value={pkrHolderName}
-                          onChange={e => setPkrHolderName(e.target.value)}
+                           placeholder="Account number"
+                           value={localAccountNumber}
+                           onChange={e => setLocalAccountNumber(e.target.value)}
                           required
+                           className="font-mono tracking-wide"
                         />
                       </div>
                     </div>
@@ -676,7 +684,7 @@ export default function Wallet() {
                             {savedAccount.accountType === "bank" && savedAccount.ifscNumber ? ` · IFSC: ${savedAccount.ifscNumber}` : ""}
                           </span>
                         )}
-                        {savedAccount.currency === "PKR" && (
+                         {(savedAccount.currency === "PKR" || savedAccount.currency === "NPR" || savedAccount.currency === "PHP") && (
                           <span>{savedAccount.accountHolderName} · {savedAccount.accountTitle} · {savedAccount.accountNumber}</span>
                         )}
                         {savedAccount.currency === "USDT" && (

@@ -23,9 +23,11 @@ export interface IUser extends Document {
   frozenReason?: string;
   profileHealth: number;
   withdrawalAccount?: {
-    currency: "INR" | "PKR" | "USDT";
+    currency: "INR" | "PKR" | "NPR" | "PHP" | "USDT";
+    accountType?: "wallet" | "bank";
     accountHolder?: string;
     accountName?: string;
+    bankName?: string;
     ifscNumber?: string;
     accountTitle?: string;
     accountNumber?: string;
@@ -57,7 +59,7 @@ const UserSchema = new Schema<IUser>(
     profileHealth: { type: Number, default: 100, min: 0, max: 100 },
     withdrawalAccount: {
       type: new Schema({
-        currency: { type: String, enum: ["INR", "PKR", "USDT"], required: true },
+        currency: { type: String, enum: ["INR", "PKR", "NPR", "PHP", "USDT"], required: true },
         accountType: { type: String, enum: ["wallet", "bank"] },
         accountHolder: { type: String },
         accountName: { type: String },
