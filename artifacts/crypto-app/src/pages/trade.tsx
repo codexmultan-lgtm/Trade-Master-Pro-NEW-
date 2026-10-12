@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { useQueryClient } from "@tanstack/react-query";
+import "./trade-responsive.css";
 
 export default function TradePage() {
   const { symbol } = useParams();
@@ -134,11 +135,11 @@ export default function TradePage() {
   const symbolActiveTrades = (Array.isArray(activeTrades) ? activeTrades : []).filter(t => t.symbol === symbol);
 
   return (
-    <div className="flex flex-col h-full bg-background relative">
-      <div className="p-4 border-b border-border flex justify-between items-center bg-card">
-        <h1 className="text-xl font-bold tracking-tight">{symbolToDisplay(symbol ?? "")}</h1>
-        <div className="text-right">
-          <div className="text-2xl font-bold">
+    <div className="trade-page flex flex-col bg-background relative">
+      <div className="trade-market-header border-b border-border bg-card">
+        <h1 className="trade-market-symbol font-bold tracking-tight">{symbolToDisplay(symbol ?? "")}</h1>
+        <div className="trade-market-price-wrap">
+          <div className="trade-market-price font-bold">
             {currentPrice
               ? formatMarketPrice(currentPrice, getQuoteAsset(symbol ?? "BTCUSDT"))
               : "---"}
@@ -146,14 +147,14 @@ export default function TradePage() {
         </div>
       </div>
 
-      <div style={{ height: "320px", flexShrink: 0 }} className="w-full relative bg-[#0d1117]">
+      <div className="trade-chart-container relative bg-[#0d1117]">
         <CandleChart data={candles} symbol={symbol!} />
       </div>
 
       {symbolActiveTrades.length > 0 && (
-        <div className="p-4 bg-card/80 border-y border-border overflow-x-auto whitespace-nowrap flex gap-3">
+        <div className="trade-active-trades bg-card/80 border-y border-border">
           {symbolActiveTrades.map(trade => (
-            <div key={trade.id} className="inline-block border border-border bg-background p-3 rounded-lg min-w-[200px]">
+            <div key={trade.id} className="trade-active-card border border-border bg-background rounded-lg">
               <div className="flex justify-between items-center mb-1">
                 <span className={`flex items-center text-xs font-bold ${trade.direction === 'up' ? 'text-primary' : 'text-destructive'}`}>
                   {trade.direction === 'up' ? <ArrowUp className="w-3 h-3 mr-1" /> : <ArrowDown className="w-3 h-3 mr-1" />}
@@ -169,7 +170,7 @@ export default function TradePage() {
       )}
 
       {user?.tradeBanned ? (
-        <div className="p-4 bg-background border-t border-border mt-auto">
+        <div className="trade-actions bg-background border-t border-border mt-auto">
           <div className="flex items-start gap-3 bg-destructive/10 border border-destructive/30 rounded-lg p-4">
             <Ban className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
             <div>
@@ -181,15 +182,15 @@ export default function TradePage() {
           </div>
         </div>
       ) : (
-        <div className="p-4 grid grid-cols-2 gap-4 bg-background border-t border-border mt-auto">
+        <div className="trade-actions grid grid-cols-2 bg-background border-t border-border mt-auto">
           <Button 
-            className="h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
+            className="trade-action-button text-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
             onClick={() => openTradeSheet('up')}
           >
             <ArrowUp className="mr-2" /> BUY UP
           </Button>
           <Button 
-            className="h-14 text-lg bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold"
+            className="trade-action-button text-lg bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold"
             onClick={() => openTradeSheet('down')}
           >
             <ArrowDown className="mr-2" /> BUY DOWN
@@ -198,20 +199,20 @@ export default function TradePage() {
       )}
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh]">
+        <SheetContent side="bottom" className="trade-confirm-sheet rounded-t-2xl">
           <SheetHeader>
-            <SheetTitle className="flex items-center justify-between">
+            <SheetTitle className="trade-confirm-title flex items-center justify-between">
               <span>{tradeDirection === 'up' ? 'BUY UP ▲' : 'BUY DOWN ▼'}</span>
               <span className="text-muted-foreground">{symbol}</span>
             </SheetTitle>
           </SheetHeader>
-          <div className="py-6 space-y-6">
+          <div className="trade-confirm-content space-y-6">
             <Tabs value={duration} onValueChange={setDuration}>
-              <TabsList className="grid grid-cols-4 w-full h-10">
-                <TabsTrigger value="60">60s</TabsTrigger>
-                <TabsTrigger value="120">120s</TabsTrigger>
-                <TabsTrigger value="180">180s</TabsTrigger>
-                <TabsTrigger value="240">240s</TabsTrigger>
+              <TabsList className="grid grid-cols-4 w-full h-11">
+                <TabsTrigger className="trade-duration-trigger" value="60">60s</TabsTrigger>
+                <TabsTrigger className="trade-duration-trigger" value="120">120s</TabsTrigger>
+                <TabsTrigger className="trade-duration-trigger" value="180">180s</TabsTrigger>
+                <TabsTrigger className="trade-duration-trigger" value="240">240s</TabsTrigger>
               </TabsList>
               <div className="text-center mt-2 text-sm font-medium text-accent">
                 Profit: {profitMap[duration]}%
@@ -219,13 +220,13 @@ export default function TradePage() {
             </Tabs>
 
             <div className="space-y-3">
-              <label className="text-sm font-medium text-muted-foreground">Investment Amount</label>
+              <label htmlFor="trade-investment-amount" className="text-sm font-medium text-muted-foreground">Investment Amount</label>
               <div className="flex gap-2">
                 {quickPicks.map(val => (
                   <Button 
                     key={val} 
                     variant={amount === val ? "default" : "outline"} 
-                    className="flex-1 text-xs"
+                    className="trade-quick-pick flex-1 text-xs"
                     onClick={() => setAmount(val)}
                   >
                     {Number(val).toLocaleString()}
@@ -233,12 +234,13 @@ export default function TradePage() {
                 ))}
               </div>
               <Input 
+                id="trade-investment-amount"
                 type="number" 
                 value={amount} 
                 onChange={(e) => setAmount(e.target.value)}
                 min={minTradeAmount}
                 max={maxTradeAmount}
-                className="text-center text-lg font-bold h-12"
+                className="trade-amount-input text-center text-lg font-bold h-12"
               />
               <p className="text-xs text-muted-foreground text-center">
                 Min: {minTradeAmount.toLocaleString()} — Max: {maxTradeAmount.toLocaleString()}
@@ -246,7 +248,7 @@ export default function TradePage() {
             </div>
 
             <Button 
-              className={`w-full h-14 text-lg font-bold ${tradeDirection === 'up' ? 'bg-primary hover:bg-primary/90' : 'bg-destructive hover:bg-destructive/90'}`}
+              className={`trade-confirm-button w-full h-14 text-lg font-bold ${tradeDirection === 'up' ? 'bg-primary hover:bg-primary/90' : 'bg-destructive hover:bg-destructive/90'}`}
               onClick={handlePlaceTrade}
               disabled={placeTrade.isPending}
             >

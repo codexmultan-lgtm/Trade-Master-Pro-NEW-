@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useSocket } from "@/hooks/useSocket";
 import { TrendingUp, TrendingDown, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import "./trade-responsive.css";
 
 export default function TradeList() {
   const { data: initialMarkets, isLoading } = useGetMarkets();
@@ -41,7 +42,19 @@ export default function TradeList() {
   }, [subscribe]);
 
   if (isLoading) {
-    return <div className="p-4 text-center mt-10">Loading markets...</div>;
+    return (
+      <div className="trade-markets-page" aria-label="Loading markets">
+        <div className="trade-markets-heading space-y-4">
+          <div className="h-8 w-32 rounded-md bg-muted animate-pulse" />
+          <div className="h-12 w-full rounded-md bg-muted animate-pulse" />
+        </div>
+        <div className="trade-markets-list">
+          <div className="trade-market-skeleton" />
+          <div className="trade-market-skeleton" />
+          <div className="trade-market-skeleton" />
+        </div>
+      </div>
+    );
   }
 
   const filteredMarkets = Object.values(markets).filter(m => 
@@ -50,39 +63,39 @@ export default function TradeList() {
   );
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 space-y-4">
+    <div className="trade-markets-page">
+      <div className="trade-markets-heading space-y-4">
         <h1 className="text-2xl font-bold tracking-tight">Markets</h1>
         <div className="relative">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Search pairs..." 
-            className="pl-9 bg-card border-border"
+            className="trade-markets-search pl-9 bg-card border-border"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto px-4 pb-4 space-y-2">
+      <div className="trade-markets-list">
         {filteredMarkets.length > 0 ? filteredMarkets.map(market => {
           const isPositive = market.change24h >= 0;
           return (
-            <Link key={market.symbol} href={`/trade/${market.symbol}`}>
-              <Card className="bg-card border-border hover:bg-accent/5 transition-colors cursor-pointer mb-2">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+            <Link key={market.symbol} href={`/trade/${market.symbol}`} className="trade-market-link">
+              <Card className="bg-card border-border hover:bg-accent/5 transition-colors cursor-pointer">
+                <CardContent className="trade-market-row flex items-center justify-between gap-3">
+                  <div className="trade-market-identity flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center font-bold text-xs">
                       {market.baseAsset.substring(0, 3)}
                     </div>
-                    <div>
-                      <div className="font-bold">{market.baseAsset}/{market.quoteAsset}</div>
+                    <div className="min-w-0">
+                      <div className="trade-market-name font-bold">{market.baseAsset}/{market.quoteAsset}</div>
                       <div className="text-xs text-muted-foreground">Vol {market.volume24h?.toFixed(0) || "0"}</div>
                     </div>
                   </div>
                   
-                  <div className="text-right">
-                    <div className="font-bold text-lg">{formatMarketPrice(market.lastPrice ?? 0, market.quoteAsset)}</div>
+                  <div className="trade-market-quote text-right">
+                    <div className="font-bold">{formatMarketPrice(market.lastPrice ?? 0, market.quoteAsset)}</div>
                     <div className={`text-xs flex items-center justify-end font-medium ${isPositive ? 'text-primary' : 'text-destructive'}`}>
                       {isPositive ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
                       {isPositive ? '+' : ''}{market.change24h?.toFixed(2) || "0.00"}%
@@ -93,7 +106,7 @@ export default function TradeList() {
             </Link>
           );
         }) : (
-          <div className="text-center text-muted-foreground p-8">No markets found</div>
+          <div className="trade-market-empty text-center text-muted-foreground">No markets found</div>
         )}
       </div>
     </div>

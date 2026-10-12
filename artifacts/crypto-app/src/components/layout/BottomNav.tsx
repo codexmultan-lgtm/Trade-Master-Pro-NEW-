@@ -21,7 +21,7 @@ export function BottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className={`fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${location.startsWith("/trade") ? "trade-bottom-nav" : ""}`}>
       <nav className="flex h-16 items-center justify-around px-4">
         {navItems.map((item) => {
           const Icon = item.icon;

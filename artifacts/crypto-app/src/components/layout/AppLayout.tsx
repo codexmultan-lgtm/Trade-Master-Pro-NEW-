@@ -4,15 +4,18 @@ import { BottomNav } from "./BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
+  const [location] = useLocation();
+  const isTradeRoute = location.startsWith("/trade");
   const isSuspended = user && user.status !== "active";
 
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-background text-foreground pb-16">
+    <div className={`flex flex-col min-h-[100dvh] bg-background text-foreground pb-16 ${isTradeRoute ? "trade-shell" : ""}`}>
       <Header />
-      <main className="flex-1 w-full max-w-7xl mx-auto flex flex-col">
+      <main className={`flex-1 w-full max-w-7xl mx-auto flex flex-col ${isTradeRoute ? "trade-route-main" : ""}`}>
         {isSuspended ? (
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="max-w-md w-full text-center space-y-4 bg-destructive/10 border border-destructive/30 rounded-xl p-8">
