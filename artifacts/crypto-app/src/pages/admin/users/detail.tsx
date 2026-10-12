@@ -49,7 +49,9 @@ async function patchUserBan(id: string, path: string, body: object): Promise<voi
 
 export default function AdminUserDetail() {
   const { id } = useParams();
-  const { data, isLoading } = useGetAdminUser(id as string, { query: { enabled: !!id } });
+  const { data, isLoading } = useGetAdminUser(id as string, {
+    query: { enabled: !!id, queryKey: getGetAdminUserQueryKey(id as string) }
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

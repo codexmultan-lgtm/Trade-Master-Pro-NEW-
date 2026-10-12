@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import { useGetMarkets } from "@workspace/api-client-react";
+import type { Variants } from "framer-motion";
+import { useGetMarkets, type Market } from "@workspace/api-client-react";
 import { useSocket } from "@/hooks/useSocket";
 import {
   TrendingUp,
@@ -22,7 +23,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 40 },
   visible: (i = 0) => ({
     opacity: 1,
@@ -52,11 +53,7 @@ function AnimatedSection({ children, className = "" }: { children: React.ReactNo
   );
 }
 
-type MarketData = {
-  symbol: string;
-  price: number;
-  change24h: number;
-};
+type MarketData = Market;
 
 function LiveTicker() {
   const { data: markets } = useGetMarkets();
@@ -66,7 +63,7 @@ function LiveTicker() {
   useEffect(() => {
     if (markets) {
       const map: Record<string, number> = {};
-      markets.forEach((m: MarketData) => { map[m.symbol] = m.price; });
+      markets.forEach((m) => { map[m.symbol] = m.lastPrice; });
       setPrices(map);
     }
   }, [markets]);
@@ -87,8 +84,8 @@ function LiveTicker() {
         animate={{ x: ["0%", "-50%"] }}
         transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
       >
-        {[...items, ...items].map((m: MarketData, i: number) => {
-          const price = prices[m.symbol] ?? m.price ?? 0;
+        {[...items, ...items].map((m, i) => {
+          const price = prices[m.symbol] ?? m.lastPrice ?? 0;
           const change = m.change24h ?? 0;
           const isUp = change >= 0;
           return (
@@ -343,7 +340,7 @@ function LiveMarketsSection() {
   useEffect(() => {
     if (markets) {
       const map: Record<string, number> = {};
-      markets.forEach((m: MarketData) => { map[m.symbol] = m.price; });
+      markets.forEach((m) => { map[m.symbol] = m.lastPrice; });
       setPrices(map);
     }
   }, [markets]);
@@ -380,8 +377,8 @@ function LiveMarketsSection() {
         </AnimatedSection>
 
         <AnimatedSection className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(markets ?? []).map((m: MarketData, i: number) => {
-            const price = prices[m.symbol] ?? m.price ?? 0;
+          {(markets ?? []).map((m, i) => {
+            const price = prices[m.symbol] ?? m.lastPrice ?? 0;
             const change = m.change24h ?? 0;
             const isUp = change >= 0;
             const gradient = symbolColors[m.symbol] ?? "from-gray-500 to-gray-600";

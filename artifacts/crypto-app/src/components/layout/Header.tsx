@@ -1,7 +1,12 @@
 import { Link, useLocation } from "wouter";
 import { Bell, ShieldAlert, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useGetUnreadNotificationCount, useGetCurrentPrice } from "@workspace/api-client-react";
+import {
+  getGetCurrentPriceQueryKey,
+  getGetUnreadNotificationCountQueryKey,
+  useGetUnreadNotificationCount,
+  useGetCurrentPrice,
+} from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
@@ -11,11 +16,11 @@ export function Header() {
   const [location, setLocation] = useLocation();
   const { user, isAdmin, logout } = useAuth();
   const { data: unreadCount } = useGetUnreadNotificationCount({
-    query: { enabled: !!user }
+    query: { enabled: !!user, queryKey: getGetUnreadNotificationCountQueryKey() }
   });
   
   const { data: btcPriceData } = useGetCurrentPrice("BTCUSDT", {
-    query: { enabled: !!user, staleTime: 30000 } // initial fetch
+    query: { enabled: !!user, staleTime: 30000, queryKey: getGetCurrentPriceQueryKey("BTCUSDT") } // initial fetch
   });
 
   const [btcPrice, setBtcPrice] = useState<number | null>(null);

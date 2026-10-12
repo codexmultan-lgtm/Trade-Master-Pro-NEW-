@@ -28,7 +28,7 @@ export default function Notifications() {
 
   if (isLoading) return <div className="p-4 text-center mt-10">Loading notifications...</div>;
 
-  const notifications = notifsData?.notifications || [];
+  const notifications = notifsData ?? [];
 
   return (
     <div className="p-4 space-y-4">
@@ -43,7 +43,7 @@ export default function Notifications() {
 
       <div className="space-y-3">
         {notifications.length > 0 ? notifications.map(notif => (
-          <Card key={notif.id} className={`border-border cursor-pointer transition-colors ${!notif.read ? 'bg-card border-primary/50' : 'bg-background'}`} onClick={() => !notif.read && markRead.mutate({ data: { id: notif.id } as any })}>
+          <Card key={notif.id} className={`border-border cursor-pointer transition-colors ${!notif.read ? 'bg-card border-primary/50' : 'bg-background'}`} onClick={() => !notif.read && markRead.mutate({ id: notif.id })}>
             <CardContent className="p-4">
               <div className="flex justify-between items-start mb-1">
                 <div className="font-bold text-sm">{notif.title}</div>
