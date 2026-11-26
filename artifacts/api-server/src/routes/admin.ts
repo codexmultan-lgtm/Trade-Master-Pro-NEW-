@@ -7,6 +7,13 @@ import { Trade } from "../models/Trade.js";
 import { Notification } from "../models/Notification.js";
 import { TradeSetting } from "../models/TradeSetting.js";
 import { PlatformSettings, getOrCreateSettings, formatSettings, CURRENCY_SYMBOLS } from "../models/PlatformSettings.js";
+import {
+  GetAdminWithdrawalAccountParams,
+  GetAdminWithdrawalAccountResponse,
+  UpdateAdminWithdrawalAccountParams,
+  UpdateAdminWithdrawalAccountBody,
+  UpdateAdminWithdrawalAccountResponse,
+} from "@workspace/api-zod";
 
 const router = Router();
 router.use(authMiddleware, adminMiddleware);
@@ -161,6 +168,48 @@ router.get("/users/:id", async (req: AuthRequest, res: Response) => {
     recentTrades: recentTrades.map((t) => formatTrade(t, { email: user.email, name: user.name })),
     recentTransactions: recentTransactions.map((tx) => formatTx(tx, { email: user.email, name: user.name })),
   });
+});
+
+router.get("/users/:id/withdrawal-account", async (req: AuthRequest, res: Response): Promise<void> => {
+  const params = GetAdminWithdrawalAccountParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: "Invalid user ID" });
+    return;
+  }
+  const user = await User.findById(params.data.id).select("withdrawalAccount");
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+  res.json(GetAdminWithdrawalAccountResponse.parse(user.withdrawalAccount ?? null));
+});
+
+router.patch("/users/:id/withdrawal-account", async (req: AuthRequest, res: Response): Promise<void> => {
+  const params = UpdateAdminWithdrawalAccountParams.safeParse(req.params);
+  const body = UpdateAdminWithdrawalAccountBody.strict().safeParse(req.body);
+  if (!params.success || !body.success) {
+    res.status(400).json({ error: "A valid user ID and account number (1–128 characters) are required" });
+    return;
+  }
+  const user = await User.findById(params.data.id).select("withdrawalAccount");
+  if (!user) { res.status(404).json({ error: "User not found" }); return; }
+  if (!user.withdrawalAccount) {
+    res.status(400).json({ error: "The user has not saved a withdrawal account" });
+    return;
+  }
+  if (user.withdrawalAccount.currency === "USDT") {
+    res.status(400).json({ error: "USDT uses a wallet address, not an account number" });
+    return;
+  }
+  // Change only the saved number, never balances, other details, or transaction snapshots.
+  // Matching the original account also prevents overwriting a concurrent user edit.
+  const updated = await User.findOneAndUpdate(
+    { _id: user._id, withdrawalAccount: user.withdrawalAccount },
+    { $set: { "withdrawalAccount.accountNumber": body.data.accountNumber.trim() } },
+    { new: true, runValidators: true },
+  ).select("withdrawalAccount");
+  if (!updated) {
+    res.status(409).json({ error: "The saved account changed. Reload and try again." });
+    return;
+  }
+  res.json(UpdateAdminWithdrawalAccountResponse.parse(updated.withdrawalAccount));
 });
 
 router.patch("/users/:id", async (req: AuthRequest, res: Response) => {

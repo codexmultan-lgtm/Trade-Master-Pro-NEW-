@@ -556,6 +556,64 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
 
+  /admin/users/{id}/withdrawal-account:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: "^[a-fA-F0-9]{24}$"
+    get:
+      operationId: getAdminWithdrawalAccount
+      tags: [admin]
+      summary: Get a user's saved withdrawal account (admin only)
+      responses:
+        "200":
+          description: Saved account, or null if none exists
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/WithdrawalAccount"
+                  - type: "null"
+        "400":
+          description: Invalid user ID
+        "401":
+          description: Authentication required
+        "403":
+          description: Admin access required
+        "404":
+          description: User not found
+    patch:
+      operationId: updateAdminWithdrawalAccount
+      tags: [admin]
+      summary: Change only a user's saved withdrawal account number (admin only)
+      description: Preserves all other account fields and all submitted transactions. USDT accounts do not have account numbers.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawalAccountNumberUpdate"
+      responses:
+        "200":
+          description: Updated saved withdrawal account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WithdrawalAccount"
+        "400":
+          description: Invalid input, missing saved account, or account without an account number
+        "401":
+          description: Authentication required
+        "403":
+          description: Admin access required
+        "404":
+          description: User not found
+        "409":
+          description: Saved account changed while updating; reload and try again
+
   /admin/users/{id}/balance:
     patch:
       operationId: adjustUserBalance
@@ -966,6 +1024,17 @@ components:
           type: ["string", "null"]
         walletAddress:
           type: ["string", "null"]
+
+    WithdrawalAccountNumberUpdate:
+      type: object
+      additionalProperties: false
+      required: [accountNumber]
+      properties:
+        accountNumber:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: "\\S"
 
     WithdrawalAccountInput:
       type: object

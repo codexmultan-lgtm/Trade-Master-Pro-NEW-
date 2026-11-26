@@ -26,10 +26,12 @@ export default defineConfig({
       target: "generated",
       client: "react-query",
       mode: "split",
+      indexFiles: false,
       baseUrl: "/api",
       clean: true,
       prettier: true,
       override: {
+        query: { version: 5 },
         fetch: {
           includeHttpResponseReturnType: false,
         },
@@ -53,10 +55,12 @@ export default defineConfig({
       target: "generated",
       schemas: { path: "generated/types", type: "typescript" },
       mode: "split",
+      indexFiles: false,
       clean: true,
       prettier: true,
       override: {
         zod: {
+          version: 3,
           coerce: {
             query: ['boolean', 'number', 'string'],
             param: ['boolean', 'number', 'string'],

@@ -14,6 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { format } from "date-fns";
 import { ArrowLeft, ArrowUp, ArrowDown, Ban, ShieldOff, KeyRound, HeartPulse } from "lucide-react";
 import { Link } from "wouter";
+import { WithdrawalAccountCard } from "@/components/admin/WithdrawalAccountCard";
 
 function healthColor(value: number) {
   if (value >= 70) return { text: "text-emerald-400", bar: "bg-emerald-400", ring: "stroke-emerald-400" };
@@ -224,6 +225,8 @@ export default function AdminUserDetail() {
         </Link>
         <h1 className="text-2xl font-bold tracking-tight">User Details</h1>
       </div>
+
+      <WithdrawalAccountCard key={id} userId={id as string} />
 
       <Card>
         <CardContent className="p-6">
