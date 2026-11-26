@@ -4,9 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useChangePassword } from "@workspace/api-client-react";
+import {
+  useChangePassword,
+  useGetWithdrawalAccount,
+  getGetWithdrawalAccountQueryKey,
+} from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, User as UserIcon, HeartPulse, TrendingUp, ShieldCheck, AlertTriangle } from "lucide-react";
+import { LogOut, User as UserIcon, HeartPulse, TrendingUp, ShieldCheck, AlertTriangle, Building2, CircleDollarSign } from "lucide-react";
 import ProfileHealthRing from "@/components/ProfileHealthRing";
 
 function healthTips(value: number): { icon: typeof ShieldCheck; text: string }[] {
@@ -24,6 +28,9 @@ function healthTips(value: number): { icon: typeof ShieldCheck; text: string }[]
 
 export default function Profile() {
   const { user, logout } = useAuth();
+  const { data: withdrawalAccount, isLoading: isWithdrawalAccountLoading } = useGetWithdrawalAccount({
+    query: { queryKey: getGetWithdrawalAccountQueryKey(), staleTime: 0, refetchOnWindowFocus: true },
+  });
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const { toast } = useToast();
@@ -111,6 +118,42 @@ export default function Profile() {
           <p className="text-xs text-muted-foreground text-center">
             Your Profile Health score reflects your account standing and is managed by our team.
           </p>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {withdrawalAccount?.currency === "USDT"
+              ? <CircleDollarSign className="w-5 h-5 text-primary" />
+              : <Building2 className="w-5 h-5 text-primary" />}
+            Withdrawal Account
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isWithdrawalAccountLoading ? (
+            <p className="text-sm text-muted-foreground">Loading saved account...</p>
+          ) : !withdrawalAccount ? (
+            <p className="text-sm text-muted-foreground">No withdrawal account saved yet. Add one from your wallet.</p>
+          ) : (
+            <dl className="space-y-2 text-sm">
+              <div><dt className="inline text-muted-foreground">Currency: </dt><dd className="inline font-medium">{withdrawalAccount.currency}</dd></div>
+              {withdrawalAccount.accountType && <div><dt className="inline text-muted-foreground">Account type: </dt><dd className="inline capitalize">{withdrawalAccount.accountType}</dd></div>}
+              {(withdrawalAccount.accountHolder || withdrawalAccount.accountHolderName) && (
+                <div><dt className="inline text-muted-foreground">Account holder: </dt><dd className="inline">{withdrawalAccount.accountHolder || withdrawalAccount.accountHolderName}</dd></div>
+              )}
+              {withdrawalAccount.accountTitle && <div><dt className="inline text-muted-foreground">Account title: </dt><dd className="inline">{withdrawalAccount.accountTitle}</dd></div>}
+              {withdrawalAccount.accountName && <div><dt className="inline text-muted-foreground">Wallet name: </dt><dd className="inline">{withdrawalAccount.accountName}</dd></div>}
+              {withdrawalAccount.bankName && <div><dt className="inline text-muted-foreground">Bank: </dt><dd className="inline">{withdrawalAccount.bankName}</dd></div>}
+              {withdrawalAccount.ifscNumber && <div><dt className="inline text-muted-foreground">IFSC: </dt><dd className="inline">{withdrawalAccount.ifscNumber}</dd></div>}
+              {withdrawalAccount.currency === "USDT" ? (
+                <div className="break-all"><dt className="inline text-muted-foreground">Wallet address: </dt><dd className="inline font-mono">{withdrawalAccount.walletAddress}</dd></div>
+              ) : (
+                <div className="break-all"><dt className="inline text-muted-foreground">Account number: </dt><dd className="inline font-mono">{withdrawalAccount.accountNumber}</dd></div>
+              )}
+              <p className="pt-2 text-xs text-muted-foreground">This is the current saved destination for future withdrawal requests.</p>
+            </dl>
+          )}
         </CardContent>
       </Card>
 

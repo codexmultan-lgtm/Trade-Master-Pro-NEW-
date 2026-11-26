@@ -14,10 +14,11 @@ A full-stack mobile-first binary demo trading platform with real-time price feed
 ## Admin withdrawal account numbers
 
 - Admin → Users → User Details includes a **Withdrawal Account** card for editing an existing saved account number.
-- Only the number changes; account holder, currency, bank details, balances, and submitted withdrawal transactions are preserved. Future withdrawals use the updated saved number.
+- Only the saved account number and the account number on **pending** withdrawal requests change. Approved/rejected transaction history, account holder, currency, bank details, balances, and all other transaction details stay unchanged.
+- The current saved destination is shown in the user's Profile and wallet form. Future withdrawal requests use the updated saved number.
 - USDT wallet addresses and accounts that have not been saved are read-only in this card.
 - `pnpm --filter @workspace/api-server run test:withdrawal-account` tests persistence, admin-only access, validation, a demo withdrawal and approval, and cleanup in a disposable MongoDB instance. It never uses `MONGODB_URI`. Test binaries are cached under `.cache/`, excluded from Git and deployment.
-- `PLAYWRIGHT_CHROMIUM_EXECUTABLE=$(command -v chromium) pnpm --filter @workspace/crypto-app exec playwright test --config playwright.config.ts e2e/admin-withdrawal-account.spec.ts --workers=2` checks the admin form using demo API fixtures, including saving, cancellation, reload, errors, and mobile layout.
+- `PLAYWRIGHT_CHROMIUM_EXECUTABLE=$(command -v chromium) pnpm --filter @workspace/crypto-app exec playwright test --config playwright.config.ts e2e/admin-withdrawal-account.spec.ts e2e/profile-withdrawal-account.spec.ts --workers=2` checks admin editing and that users see the current saved account on Profile.
 - Use Node.js 24 for the current dependency toolchain. Blocked package versions were updated within their existing major versions to allow installation and API generation.
 
 ## Stack

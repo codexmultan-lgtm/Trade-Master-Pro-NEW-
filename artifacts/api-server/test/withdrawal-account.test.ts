@@ -60,7 +60,19 @@ test("admin edit persists, demo withdrawal approval works, and demo data is roll
   try {
     const old = await Transaction.create({
       userId: user._id, type: "withdrawal", amount: 10, status: "pending",
-      method: "bank_transfer", accountDetails: "Demo Bank | 00112233 | Demo Holder",
+      method: "bank_transfer", accountDetails: "PKR | Demo Holder | Demo Bank | Acc: 00112233",
+    });
+    const pendingWithoutAccountLabel = await Transaction.create({
+      userId: user._id, type: "withdrawal", amount: 15, status: "pending",
+      method: "bank_transfer", accountDetails: "Manually entered account details",
+    });
+    const oldApproved = await Transaction.create({
+      userId: user._id, type: "withdrawal", amount: 10, status: "approved",
+      method: "bank_transfer", accountDetails: "PKR | Demo Holder | Demo Bank | Acc: 00112233",
+    });
+    const oldRejected = await Transaction.create({
+      userId: user._id, type: "withdrawal", amount: 10, status: "rejected",
+      method: "bank_transfer", accountDetails: "PKR | Demo Holder | Demo Bank | Acc: 00112233",
     });
     assert.equal((await request(path, null)).status, 401);
     assert.equal((await request(path, userToken)).status, 403);
@@ -78,7 +90,10 @@ test("admin edit persists, demo withdrawal approval works, and demo data is roll
     assert.equal(update.data.accountTitle, "Demo Bank");
     assert.equal(update.data.currency, "PKR");
     assert.equal((await User.findById(id))!.balance, 1000);
-    assert.equal((await Transaction.findById(old._id))!.accountDetails, old.accountDetails);
+    assert.equal((await Transaction.findById(old._id))!.accountDetails, "PKR | Demo Holder | Demo Bank | Acc: 00998877");
+    assert.equal((await Transaction.findById(pendingWithoutAccountLabel))!.accountDetails, "Manually entered account details | Acc: 00998877");
+    assert.equal((await Transaction.findById(oldApproved._id))!.accountDetails, oldApproved.accountDetails);
+    assert.equal((await Transaction.findById(oldRejected._id))!.accountDetails, oldRejected.accountDetails);
     const saved = await request("/wallet/withdrawal-account", userToken);
     assert.equal(saved.data.accountNumber, "00998877");
     assert.equal((await request(path)).data.accountNumber, "00998877");

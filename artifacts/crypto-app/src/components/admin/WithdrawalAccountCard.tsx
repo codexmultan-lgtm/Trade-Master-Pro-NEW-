@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   useGetAdminWithdrawalAccount,
   useUpdateAdminWithdrawalAccount,
+  getGetAdminUserQueryKey,
   getGetAdminWithdrawalAccountQueryKey,
   getGetWithdrawalAccountQueryKey,
 } from "@workspace/api-client-react";
@@ -25,6 +26,7 @@ export function WithdrawalAccountCard({ userId }: { userId: string }) {
       onSuccess: (saved) => {
         queryClient.setQueryData(queryKey, saved);
         queryClient.invalidateQueries({ queryKey });
+        queryClient.invalidateQueries({ queryKey: getGetAdminUserQueryKey(userId) });
         queryClient.invalidateQueries({ queryKey: getGetWithdrawalAccountQueryKey() });
         setDraft(null);
         toast({ title: "Withdrawal account number updated" });

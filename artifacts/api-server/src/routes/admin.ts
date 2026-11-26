@@ -198,7 +198,8 @@ router.patch("/users/:id/withdrawal-account", async (req: AuthRequest, res: Resp
     res.status(400).json({ error: "USDT uses a wallet address, not an account number" });
     return;
   }
-  // Change only the saved number, never balances, other details, or transaction snapshots.
+  // Change only the saved number and pending withdrawal destinations; completed
+  // transaction snapshots, balances, and other account details are preserved.
   // Matching the original account also prevents overwriting a concurrent user edit.
   const updated = await User.findOneAndUpdate(
     { _id: user._id, withdrawalAccount: user.withdrawalAccount },
@@ -209,6 +210,57 @@ router.patch("/users/:id/withdrawal-account", async (req: AuthRequest, res: Resp
     res.status(409).json({ error: "The saved account changed. Reload and try again." });
     return;
   }
+  // Keep active withdrawal requests aligned with the saved destination so admins
+  // reviewing them and the user see the corrected account number. Completed
+  // withdrawals remain an immutable record of the details used when submitted.
+  await Transaction.updateMany(
+    { userId: updated._id, type: "withdrawal", status: "pending", accountDetails: { $type: "string" } },
+    [{
+      $set: {
+        updatedAt: "$$NOW",
+        accountDetails: {
+          $let: {
+            vars: { accountNumberLabel: { $regexFind: { input: "$accountDetails", regex: /Acc:\s*[^|]*/i } } },
+            in: {
+              $cond: [
+                { $gt: [{ $ifNull: ["$$accountNumberLabel.idx", -1] }, -1] },
+                {
+                  $concat: [
+                    { $substrCP: ["$accountDetails", 0, { $ifNull: ["$$accountNumberLabel.idx", 0] }] },
+                    { $literal: `Acc: ${body.data.accountNumber.trim()}` },
+                    {
+                      $substrCP: [
+                        "$accountDetails",
+                        {
+                          $add: [
+                            { $ifNull: ["$$accountNumberLabel.idx", 0] },
+                            { $strLenCP: { $ifNull: ["$$accountNumberLabel.match", ""] } },
+                          ],
+                        },
+                        {
+                          $subtract: [
+                            { $strLenCP: "$accountDetails" },
+                            {
+                              $add: [
+                                { $ifNull: ["$$accountNumberLabel.idx", 0] },
+                                { $strLenCP: { $ifNull: ["$$accountNumberLabel.match", ""] } },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+                { $concat: ["$accountDetails", { $literal: ` | Acc: ${body.data.accountNumber.trim()}` }] },
+              ],
+            },
+          },
+        },
+      },
+    }],
+    { updatePipeline: true },
+  );
   res.json(UpdateAdminWithdrawalAccountResponse.parse(updated.withdrawalAccount));
 });
 
